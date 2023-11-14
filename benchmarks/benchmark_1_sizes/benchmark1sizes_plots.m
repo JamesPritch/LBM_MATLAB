@@ -33,7 +33,7 @@ t_1024 = 200;
 D = 0.0043;
 C_0 = 1;
 omega_0sqr = 10^2;
-omega_Dsqr = 2*D*t_512;
+omega_Dsqr = 2*D*t_1024;
 
 % Find analytical solution for C
 omega_term = omega_0sqr / (omega_0sqr + omega_Dsqr);
