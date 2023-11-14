@@ -1,2 +1,2 @@
 # MATLAB
- All MATLAB code
+ All MATLAB code used in my Lattice Boltzmann Method final year project.
