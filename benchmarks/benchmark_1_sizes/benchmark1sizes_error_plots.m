@@ -1,145 +1,152 @@
 %% Plotting of Benchamrk 1 with different grid sizes
 %% Read variables from file
-x_1024 = readmatrix("1b_x1024.txt");
-y_1024 = readmatrix("1b_y1024.txt");
-ux_1024 = readmatrix("1b_ux1024.txt");
-uy_1024 = readmatrix("1b_uy1024.txt");
-C_BGK_1024 = readmatrix("1b_c1024.txt");
+x_512 = readmatrix("1b_x512.txt");
+y_512 = readmatrix("1b_y512.txt");
+ux_512 = readmatrix("1b_ux512.txt");
+uy_512 = readmatrix("1b_uy512.txt");
+C_BGK_512 = readmatrix("1b_c512.txt");
 
-x_0512 = readmatrix("1b_x512.txt");
-y_0512 = readmatrix("1b_y512.txt");
-ux_0512 = readmatrix("1b_ux512.txt");
-uy_0512 = readmatrix("1b_uy512.txt");
-C_BGK_0512 = readmatrix("1b_c512.txt");
+x_256 = readmatrix("1b_x256.txt");
+y_256 = readmatrix("1b_y256.txt");
+ux_256 = readmatrix("1b_ux256.txt");
+uy_256 = readmatrix("1b_uy256.txt");
+C_BGK_256 = readmatrix("1b_c256.txt");
 
-x_0256 = readmatrix("1b_x256.txt");
-y_0256 = readmatrix("1b_y256.txt");
-ux_0256 = readmatrix("1b_ux256.txt");
-uy_0256 = readmatrix("1b_uy256.txt");
-C_BGK_0256 = readmatrix("1b_c256.txt");
+x_128 = readmatrix("1b_x128.txt");
+y_128 = readmatrix("1b_y128.txt");
+ux_128 = readmatrix("1b_ux128.txt");
+uy_128 = readmatrix("1b_uy128.txt");
+C_BGK_128 = readmatrix("1b_c128.txt");
 
-x_0128 = readmatrix("1b_x128.txt");
-y_0128 = readmatrix("1b_y128.txt");
-ux_0128 = readmatrix("1b_ux128.txt");
-uy_0128 = readmatrix("1b_uy128.txt");
-C_BGK_0128 = readmatrix("1b_c128.txt");
+x_064 = readmatrix("1b_x064.txt");
+y_064 = readmatrix("1b_y064.txt");
+ux_064 = readmatrix("1b_ux064.txt");
+uy_064 = readmatrix("1b_uy064.txt");
+C_BGK_064 = readmatrix("1b_c064.txt");
 
-x_0064 = readmatrix("1b_x64.txt");
-y_0064 = readmatrix("1b_y64.txt");
-ux_0064 = readmatrix("1b_ux64.txt");
-uy_0064 = readmatrix("1b_uy64.txt");
-C_BGK_0064 = readmatrix("1b_c64.txt");
+x_032 = readmatrix("1b_x032.txt");
+y_032 = readmatrix("1b_y032.txt");
+ux_032 = readmatrix("1b_ux032.txt");
+uy_032 = readmatrix("1b_uy032.txt");
+C_BGK_032 = readmatrix("1b_c032.txt");
 
 
 %% Grid Independant Variables
 C_0 = 1;
 D = 0.0043;
 omega_0sqr = 10^2;
-x_0_all = [400 200 100 50 25];
-y_0_all = [400 200 100 50 25];
-t_all = [50 200 800 2400 9600];
-
-
-%% Grid size 1024
-% Set variables for analytical solution
-x_0_1024 = x_0_all(1);
-y_0_1024 = y_0_all(1);
-t_1024 = t_all(1);
-omega_Dsqr_1024 = 2*D*t_1024;
-
-% Find analytical solution for C
-omega_term_1024 = omega_0sqr / (omega_0sqr + omega_Dsqr_1024);
-xsqr_1024 = (x_1024 - x_0_1024 - ux_1024 * t_1024).^2;
-ysqr_1024 = transpose((y_1024 - y_0_1024 - uy_1024 * t_1024).^2);
-C_exact_1024 = omega_term_1024 * C_0 * exp( - (xsqr_1024 + ysqr_1024) / ...
-    (2 * (omega_0sqr+omega_Dsqr_1024)));
-
-% Finding L_2 error
-Error_1024 = norm(C_BGK_1024-C_exact_1024, 'fro')/norm(C_exact_1024, 'fro');
+x_0_all = [256 128 64 32 16];
+y_0_all = [256 128 64 32 16];
+t_all = [768 192 48 12 3];
+nx_all = [512 256 128 64 32];
 
 
 %% Grid size 512
 % Set variables for analytical solution
-x_0_0512 = x_0_all(2);
-y_0_0512 = y_0_all(2);
-t_0512 = t_all(2);
-omega_Dsqr_0512 = 2*D*t_0512;
+x_0_512 = x_0_all(1);
+y_0_512 = y_0_all(1);
+t_512 = t_all(1);
+omega_Dsqr_512 = 2*D*t_512;
+omega_0sqr_512 = omega_0sqr * (nx_all(1)/nx_all(1))^2;
 
 % Find analytical solution for C
-omega_term_0512 = omega_0sqr / (omega_0sqr + omega_Dsqr_0512);
-xsqr_0512 = (x_0512 - x_0_0512 - ux_0512 * t_0512).^2;
-ysqr_0512 = transpose((y_0512 - y_0_0512 - uy_0512 * t_0512).^2);
-C_exact_0512 = omega_term_0512 * C_0 * exp( - (xsqr_0512 + ysqr_0512) / ...
-    (2 * (omega_0sqr+omega_Dsqr_0512)));
+omega_term_512 = omega_0sqr_512 / (omega_0sqr_512 + omega_Dsqr_512);
+xsqr_512 = (x_512 - x_0_512 - ux_512 * t_512).^2;
+ysqr_512 = transpose((y_512 - y_0_512 - uy_512 * t_512).^2);
+C_exact_512 = omega_term_512 * C_0 * exp( - (xsqr_512 + ysqr_512) / ...
+    (2 * (omega_0sqr_512+omega_Dsqr_512)));
 
 % Finding L_2 error
-Error_0512 = norm(C_BGK_0512-C_exact_0512, 'fro')/norm(C_exact_0512, 'fro');
+Error_512 = norm(C_BGK_512 - C_exact_512, 'fro')/norm(C_exact_512, 'fro');
 
 
 %% Grid size 256
 % Set variables for analytical solution
-x_0_0256 = x_0_all(3);
-y_0_0256 = y_0_all(3);
-t_0256 = t_all(3);
-omega_Dsqr_0256 = 2*D*t_0256;
+x_0_256 = x_0_all(2);
+y_0_256 = y_0_all(2);
+t_256 = t_all(2);
+omega_Dsqr_256 = 2*D*t_256;
+omega_0sqr_256 = omega_0sqr * (nx_all(2)/nx_all(1))^2;
 
 % Find analytical solution for C
-omega_term_0256 = omega_0sqr / (omega_0sqr + omega_Dsqr_0256);
-xsqr_0256 = (x_0256 - x_0_0256 - ux_0256 * t_0256).^2;
-ysqr_0256 = transpose((y_0256 - y_0_0256 - uy_0256 * t_0256).^2);
-C_exact_0256 = omega_term_0256 * C_0 * exp( - (xsqr_0256 + ysqr_0256) / ...
-    (2 * (omega_0sqr+omega_Dsqr_0256)));
+omega_term_256 = omega_0sqr_256 / (omega_0sqr_256 + omega_Dsqr_256);
+xsqr_256 = (x_256 - x_0_256 - ux_256 * t_256).^2;
+ysqr_256 = transpose((y_256 - y_0_256 - uy_256 * t_256).^2);
+C_exact_256 = omega_term_256 * C_0 * exp( - (xsqr_256 + ysqr_256) / ...
+    (2 * (omega_0sqr_256+omega_Dsqr_256)));
 
 % Finding L_2 error
-Error_0256 = norm(C_BGK_0256-C_exact_0256, 'fro')/norm(C_exact_0256, 'fro');
+Error_256 = norm(C_BGK_256 - C_exact_256, 'fro')/norm(C_exact_256, 'fro');
 
 
 %% Grid size 128
 % Set variables for analytical solution
-x_0_0128 = x_0_all(4);
-y_0_0128 = y_0_all(4);
-t_0128 = t_all(4);
-omega_Dsqr_0128 = 2*D*t_0128;
+x_0_128 = x_0_all(3);
+y_0_128 = y_0_all(3);
+t_128 = t_all(3);
+omega_Dsqr_128 = 2*D*t_128;
+omega_0sqr_128 = omega_0sqr * (nx_all(3)/nx_all(1))^2;
 
 % Find analytical solution for C
-omega_term_0128 = omega_0sqr / (omega_0sqr + omega_Dsqr_0128);
-xsqr_0128 = (x_0128 - x_0_0128 - ux_0128 * t_0128).^2;
-ysqr_0128 = transpose((y_0128 - y_0_0128 - uy_0128 * t_0128).^2);
-C_exact_0128 = omega_term_0128 * C_0 * exp( - (xsqr_0128 + ysqr_0128) / ...
-    (2 * (omega_0sqr+omega_Dsqr_0128)));
+omega_term_128 = omega_0sqr_128 / (omega_0sqr_128 + omega_Dsqr_128);
+xsqr_128 = (x_128 - x_0_128 - ux_128 * t_128).^2;
+ysqr_128 = transpose((y_128 - y_0_128 - uy_128 * t_128).^2);
+C_exact_128 = omega_term_128 * C_0 * exp( - (xsqr_128 + ysqr_128) / ...
+    (2 * (omega_0sqr_128+omega_Dsqr_128)));
 
 % Finding L_2 error
-Error_0128 = norm(C_BGK_0128-C_exact_0128, 'fro')/norm(C_exact_0128, 'fro');
+Error_128 = norm(C_BGK_128 - C_exact_128, 'fro')/norm(C_exact_128, 'fro');
 
 
 %% Grid size 64
 % Set variables for analytical solution
-x_0_0064 = x_0_all(5);
-y_0_0064 = y_0_all(5);
-t_0064 = t_all(5);
-omega_Dsqr_0064 = 2*D*t_0064;
+x_0_064 = x_0_all(4);
+y_0_064 = y_0_all(4);
+t_064 = t_all(4);
+omega_Dsqr_064 = 2*D*t_064;
+omega_0sqr_064 = omega_0sqr * (nx_all(4)/nx_all(1))^2;
 
 % Find analytical solution for C
-omega_term_0064 = omega_0sqr / (omega_0sqr + omega_Dsqr_0064);
-xsqr_0064 = (x_0064 - x_0_0064 - ux_0064 * t_0064).^2;
-ysqr_0064 = transpose((y_0064 - y_0_0064 - uy_0064 * t_0064).^2);
-C_exact_0064 = omega_term_0064 * C_0 * exp( - (xsqr_0064 + ysqr_0064) / ...
-    (2 * (omega_0sqr+omega_Dsqr_0064)));
+omega_term_064 = omega_0sqr_064 / (omega_0sqr_064 + omega_Dsqr_064);
+xsqr_064 = (x_064 - x_0_064 - ux_064 * t_064).^2;
+ysqr_064 = transpose((y_064 - y_0_064 - uy_064 * t_064).^2);
+C_exact_064 = omega_term_064 * C_0 * exp( - (xsqr_064 + ysqr_064) / ...
+    (2 * (omega_0sqr_064+omega_Dsqr_064)));
 
 % Finding L_2 error
-Error_0064 = norm(C_BGK_0064-C_exact_0064, 'fro')/norm(C_exact_0064, 'fro');
+Error_064 = norm(C_BGK_064 - C_exact_064, 'fro')/norm(C_exact_064, 'fro');
+
+
+%% Grid size 32
+% Set variables for analytical solution
+x_0_032 = x_0_all(5);
+y_0_032 = y_0_all(5);
+t_032 = t_all(5);
+omega_Dsqr_032 = 2*D*t_032;
+omega_0sqr_032 = omega_0sqr * (nx_all(5)/nx_all(1))^2;
+
+% Find analytical solution for C
+omega_term_032 = omega_0sqr_032 / (omega_0sqr_032 + omega_Dsqr_032);
+xsqr_032 = (x_032 - x_0_032 - ux_032 * t_032).^2;
+ysqr_032 = transpose((y_032 - y_0_032 - uy_032 * t_032).^2);
+C_exact_032 = omega_term_032 * C_0 * exp( - (xsqr_032 + ysqr_032) / ...
+    (2 * (omega_0sqr_032+omega_Dsqr_032)));
+
+% Finding L_2 error
+Error_032 = norm(C_BGK_032 - C_exact_032, 'fro')/norm(C_exact_032, 'fro');
 
 
 %% Plotting
-x = 1:1024;
+x = 1:2000;
 figure;
-loglog([64 128 256 512 1024], [Error_0064 Error_0128 Error_0256 Error_0512 Error_1024], ...
-    'ko', x,x.^-1, 'k', x,x.^-2, 'k--')
+loglog([32 64 128 256 512], [Error_032 Error_064 Error_128 Error_256 Error_512], ...
+    'ko', x,4*x.^-1, 'k', x,1000*x.^-2, 'k--')
 xlabel('Side Length of Square Domain (l.u.)','interpreter','latex', fontsize=26) 
 ylabel('${L_2}$ error in ${C}$','interpreter','latex', fontsize=26)
-xlim([50 2000])
-ylim([10e-7 10e-2])
-
+xlim([10 2000])
+ylim([10e-5 10e-0])
+legend('Simulations', 'First order Convergence', 'Second order Convergence', ...
+    'interpreter','latex', fontsize = 16)
 
 
 
