@@ -1,4 +1,5 @@
 %% Plotting of Benchmark 1a: advection-diffusion of a Gaussian hill
+%% Finding analytical solution
 % Load vars from simulation 
 x = readmatrix("1b_x.txt");
 y = readmatrix("1b_y.txt");
@@ -21,12 +22,7 @@ xsqr = (x - x_0 - ux * t).^2;
 ysqr = transpose((y - y_0 - uy * t).^2);
 C_exact = omega_term * C_0 * exp( - (xsqr + ysqr) / (2 * (omega_0sqr+omega_Dsqr)));
 
-% Test prints to ensure code running as expected
-% print(xsqr)
-% print(type(x))
-% print(C_exact)
-% print(type(C_exact))
-
+%% Plotting
 % Plotting C against x
 figure;
 axes('FontSize',16, 'NextPlot', 'add');
