@@ -36,12 +36,49 @@ D = cssq*(tau - 0.5);
 % Initialisation of the concentration and velocity field at time t = 0
 mask = zeros(nx, ny);
 C = zeros(nx, ny, grids);
-[row,col] = find(abs(r-a)<0.7);
+[row,col] = find(abs(r-a)<1.4 & r>a);
 for i = 1:length(row)
     mask(row(i), col(i)) = 1;
 end
-C(:,:,1) = mask(:,:);
-C(:,:,2) = mask(:,:);
+mask64row = mask(1:65,1:65);
+for i=1:64
+    for j=1:64
+        if mask64row(i,j) == 1 && mask64row(i+1,j) == 1
+            mask64row(i,j) = 0;
+        end
+    end
+end
+mask64col = mask(1:65,1:65);
+for i=1:64
+    for j=1:64
+        if mask64col(i,j) == 1 && mask64col(i,j+1) == 1
+            mask64col(i,j) = 0;
+        end
+    end
+end
+mask64 = mask64col(1:64,1:64)+mask64row(1:64,1:64);
+for i=1:64
+    for j=1:64
+        if mask64(i,j) == 2
+            mask64(i,j) = 1;
+        end
+    end
+end
+% contour(mask64)
+
+C(1:64,1:64,1) = mask64(1:64,1:64);
+C(1:64,65:128,1) = mask64(1:64,64:-1:1);
+C(65:128,1:64,1) = mask64(64:-1:1,1:64);
+C(65:128,65:128,1) = mask64(64:-1:1,64:-1:1);
+
+C(:,:,2) = C(:,:,1);
+mask = C(:,:,1);
+
+[row,col] = find(mask == 1);
+
+% Plotting C_BGK
+% figure;
+% contour(C(:,:,1))
 
 ux = zeros(nx, ny);
 uy = zeros(nx, ny);

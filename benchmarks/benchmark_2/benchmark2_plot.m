@@ -57,7 +57,7 @@ plot(xplot, C_plot_exact(1,:), 'k', ...
     xplot, C_BGK_exact(1,:), 'squarek', ...
     xplot, C_plot_exact(2,:), ':k', ...
     xplot, C_BGK_exact(2,:), 'diamondk')
-title("Concentration profile for Benchmark 2", FontSize=20)
+% title("Concentration profile for Benchmark 2", FontSize=20)
 xlabel('${r/a}$','interpreter','latex', fontsize=26) 
 ylabel('${C/C_c}$','interpreter','latex', fontsize=26)
 xlim([0 1])
@@ -65,12 +65,16 @@ ylim([0 1])
 leg = legend('${\hat{t} = 0.0547}$ (Analytical)', '${\hat{t} = 0.0547}$ (AntiBB)', ...
     '${\hat{t} = 0.1095}$ (Analytical)', '${\hat{t} = 0.1095}$ (AntiBB)', ...
     'interpreter','latex', 'Location','northwest', fontsize = 18);
-leg.ItemTokenSize = [15,15,15];
+leg.ItemTokenSize = [12,12,12];
 
 
+% Plotting C_BGK
+% figure;
+% contour(C_BGK(:,:,1))
 
-
-
+% Plotting mask
+% figure;
+% heatmap(mask)
 
 
 
