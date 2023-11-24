@@ -51,13 +51,14 @@ end
 x = 1:2000;
 figure;
 loglog([32 64 128 256 512], [Error(1) Error(2) Error(3) Error(4) Error(5)], ...
-    'ko', x,4*x.^-1, 'k', x,1000*x.^-2, 'k--')
+    'ko', x,4*x.^-1, 'k:', x,1000*x.^-2, 'k')
 xlabel('Side Length of Square Domain (l.u.)','interpreter','latex', fontsize=26) 
 ylabel('${L_2}$ error in ${C}$','interpreter','latex', fontsize=26)
 xlim([10 2000])
 ylim([10e-5 10e-0])
-legend('Simulations', 'First order Convergence', 'Second order Convergence', ...
-    'interpreter','latex', fontsize = 16)
+leg = legend('Simulations', 'First order Convergence', 'Second order Convergence', ...
+             'interpreter','latex', fontsize = 16);
+leg.ItemTokenSize = [12,12,12];
 
 
 

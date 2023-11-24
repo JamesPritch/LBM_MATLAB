@@ -21,36 +21,36 @@ xsqr = (x - x_0 - ux * t).^2;
 ysqr = transpose((y - y_0 - uy * t).^2);
 C_exact = omega_term * C_0 * exp( - (xsqr + ysqr) / (2 * (omega_0sqr+omega_Dsqr)));
 
-% Test prints to ensure code running as expected
-% print(xsqr)
-% print(type(x))
-% print(C_exact)
-% print(type(C_exact))
 
 % Plotting C against x
 figure;
 axes('FontSize',16, 'NextPlot', 'add');
 plot(x, C_exact(200,:), 'k', x,C_BGK(200,:), 'k--')
-title("Concentration profile 1a", FontSize=20)
-xlabel('${x}$','interpreter','latex', fontsize=26) 
-ylabel('${C}$','interpreter','latex', fontsize=26)
+% title("Concentration profile 1a", FontSize=20)
+xlabel('${x/\Delta x}$','interpreter','latex', fontsize=26) 
+ylabel('${C/C_0}$','interpreter','latex', fontsize=26)
 xlim([100 300])
-legend('Analytical', 'BGK', fontsize = 18)
+leg = legend('Analytical', 'BGK', 'interpreter','latex', fontsize = 18);
+leg.ItemTokenSize = [25,25,25];
 
 
 % Plotting concentration contour plot 
 figure;
 axes('FontSize',16, 'NextPlot', 'add');
+plot(1:2,1:2,'k');
+plot(1:2,1:2,'k--');
 contour(C_exact, [0.02 0.05 0.08 0.11 0.143], 'k', LineWidth=0.7)
-contour(C_BGK, [0.02 0.05 0.08 0.11 0.145], 'k--', 'ShowText', 'on', ...
-    LineWidth=0.7, LabelSpacing=1100)
-title("Concentration contour plot 1a", FontSize=20)
-xlabel('${x}$','interpreter','latex', fontsize=26) 
-ylabel('${y}$','interpreter','latex', fontsize=26)
+[C,h] = contour(C_BGK, [0.02 0.05 0.08 0.11 0.145], 'k--', LineWidth=0.7);
+clabel(C,h,'FontSize',18, 'LabelSpacing',1000)
+% title("Concentration contour plot 1a", FontSize=20)
+xlabel('${x/\Delta x}$','interpreter','latex', fontsize=26) 
+ylabel('${y/\Delta x}$','interpreter','latex', fontsize=26)
 axis equal
 xlim([140 260])
 ylim([140 260])
-legend('Analytical', 'BGK', fontsize = 18)
+leg = legend({'Analytical', 'BGK', '', ''}, 'interpreter','latex', ...
+    fontsize = 18);
+leg.ItemTokenSize = [25,25,25];
 
 
 
