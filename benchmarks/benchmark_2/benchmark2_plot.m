@@ -1,7 +1,9 @@
 %% Plotting of Benchamrk 1 with different grid sizes
 %% Read C_BGK from file
-load /Users/jpritch/Documents/MATLAB/benchmarks/benchmark_2/C C
-C_BGK = C;
+load /Users/jpritch/Documents/MATLAB/benchmarks/benchmark_2/C_antiBB
+C_BGK_antiBB = C;
+% load /Users/jpritch/Documents/MATLAB/benchmarks/benchmark_2/C_inamuro 
+% C_BGK_inamuro = C;
 
 
 %% Setting Variables
@@ -46,17 +48,17 @@ xplot = 0:1/40:1;
 C_plot_exact = zeros(2,41);
 C_plot_exact(1,:) = C_exact(64,65:105,1);
 C_plot_exact(2,:) = C_exact(64,65:105,2);
-C_BGK_exact = zeros(2,41);
-C_BGK_exact(1,:) = (C_BGK(64,65:105,1)+C_BGK(65,65:105,1))/2;
-C_BGK_exact(2,:) = (C_BGK(64,65:105,2)+C_BGK(65,65:105,2))/2;
+C_BGK_plot_antiBB = zeros(2,41);
+C_BGK_plot_antiBB(1,:) = (C_BGK_antiBB(64,65:105,1) + C_BGK_antiBB(65,65:105,1))/2;
+C_BGK_plot_antiBB(2,:) = (C_BGK_antiBB(64,65:105,2) + C_BGK_antiBB(65,65:105,2))/2;
 
 % Plotting C_exact and C_BGK Concentration profiles
 figure;
 axes('FontSize',18, 'NextPlot', 'add');
 plot(xplot, C_plot_exact(1,:), 'k', ...
-    xplot, C_BGK_exact(1,:), 'squarek', ...
+    xplot, C_BGK_plot_antiBB(1,:), 'squarek', ...
     xplot, C_plot_exact(2,:), ':k', ...
-    xplot, C_BGK_exact(2,:), 'diamondk')
+    xplot, C_BGK_plot_antiBB(2,:), 'diamondk')
 % title("Concentration profile for Benchmark 2", FontSize=20)
 xlabel('${r/a}$','interpreter','latex', fontsize=26) 
 ylabel('${C/C_c}$','interpreter','latex', fontsize=26)

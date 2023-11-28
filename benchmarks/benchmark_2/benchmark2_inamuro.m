@@ -35,50 +35,70 @@ D = cssq*(tau - 0.5);
 
 % Initialisation of the concentration and velocity field at time t = 0
 mask = zeros(nx, ny);
-C = zeros(nx, ny, grids);
-[row,col] = find(abs(r-a)<1.4 & r>a);
+C_BGK_inamuro = zeros(nx, ny, grids);
+[row,col] = find(abs(r-a)<1.4 & r>a); % Finding layer mask for C = 1
 for i = 1:length(row)
     mask(row(i), col(i)) = 1;
 end
 mask64row = mask(1:65,1:65);
+mask64col = mask(1:65,1:65);
 for i=1:64
     for j=1:64
         if mask64row(i,j) == 1 && mask64row(i+1,j) == 1
             mask64row(i,j) = 0;
         end
-    end
-end
-mask64col = mask(1:65,1:65);
-for i=1:64
-    for j=1:64
         if mask64col(i,j) == 1 && mask64col(i,j+1) == 1
             mask64col(i,j) = 0;
         end
     end
 end
 mask64 = mask64col(1:64,1:64)+mask64row(1:64,1:64);
+mask65 = mask64col+mask64row;
 for i=1:64
     for j=1:64
         if mask64(i,j) == 2
             mask64(i,j) = 1;
         end
+        if mask65(i+1,j+1) == 2
+            mask65(i+1,j+1) = 1;
+        end
     end
 end
-% contour(mask64)
 
-C(1:64,1:64,1) = mask64(1:64,1:64);
-C(1:64,65:128,1) = mask64(1:64,64:-1:1);
-C(65:128,1:64,1) = mask64(64:-1:1,1:64);
-C(65:128,65:128,1) = mask64(64:-1:1,64:-1:1);
+C_BGK_inamuro(1:64,1:64,1) = mask64(1:64,1:64);
+C_BGK_inamuro(1:64,65:128,1) = mask64(1:64,64:-1:1);
+C_BGK_inamuro(65:128,1:64,1) = mask64(64:-1:1,1:64);
+C_BGK_inamuro(65:128,65:128,1) = mask64(64:-1:1,64:-1:1);
 
-C(:,:,2) = C(:,:,1);
-mask = C(:,:,1);
+C_BGK_inamuro(:,:,2) = C_BGK_inamuro(:,:,1);
+mask = C_BGK_inamuro(:,:,1);
 
 [row,col] = find(mask == 1);
 
-% Plotting C_BGK
-% figure;
-% contour(C(:,:,1))
+mask2 = zeros(nx,ny);
+mask64row_2 = mask2(1:65,1:65);
+mask64col_2 = mask2(1:65,1:65);
+for i=1:64
+    for j=1:64
+        if mask64row(i,j) == 1
+            mask64row_2(1:(i-1),j) = 2;
+        end
+        if mask64col(i,j) == 1
+            mask64col_2(i,1:(j-1)) = 2;
+        end
+    end
+end
+mask64_2 = mask64col_2(1:64,1:64)+mask64row_2(1:64,1:64);
+for i=1:64
+    for j=1:64
+        if mask64_2(i,j) == 4
+            mask64_2(i,j) = 2;
+        end
+    end
+end
+
+
+heatmap(mask64)
 
 ux = zeros(nx, ny);
 uy = zeros(nx, ny);
@@ -90,7 +110,7 @@ for l = 1:grids
     for k = 1:ndir
         cdotu = cx(k)*ux + cy(k)*uy;
         udotu = ux.^2 + uy.^2;
-        geq(:, :, k) = w(k)*C(:,:,l).*(1 + cssqinv*cdotu + 0.5*cssqinv^2*cdotu.^2 - 0.5*cssqinv*udotu);
+        geq(:, :, k) = w(k)*C_BGK_inamuro(:,:,l).*(1 + cssqinv*cdotu + 0.5*cssqinv^2*cdotu.^2 - 0.5*cssqinv*udotu);
     end
     g = geq;
     gcol = zeros(nx, ny, ndir);
@@ -122,22 +142,24 @@ for l = 1:grids
         end
     
         % Boundary conditions
-        opp = [0 2 1 4 3 7 8 5 6];
-        for i = 1:length(row)
-            for k = 1:ndir
-                g(col(i),row(i),opp(k)+1) = -gcol(col(i),row(i),k) + 2*w(k) * C_c;
-            end
-        end
+        % opp = [0 2 1 4 3 7 8 5 6];
+        % for i = 1:length(row)
+        %     for k = 1:ndir
+        %         g(col(i),row(i),opp(k)+1) = -gcol(col(i),row(i),k) + 2*w(k) * C_c;
+        %     end
+        % end
+
+        % C_dash = 
     
         % Macroscopic variables
-        C(:,:,l) = g(:, :, 1) + g(:, :, 2) + g(:, :, 3) + g(:, :, 4) + g(:, :, 5)...
+        C_BGK_inamuro(:,:,l) = g(:, :, 1) + g(:, :, 2) + g(:, :, 3) + g(:, :, 4) + g(:, :, 5)...
             + g(:, :, 6) + g(:, :, 7) + g(:, :, 8) + g(:, :, 9);
     
         % Equilibrium distribution function
         for k = 1:ndir
             cdotu = cx(k)*ux + cy(k)*uy;
             udotu = ux.^2 + uy.^2;
-            geq(:, :, k) = w(k)*C(:,:,l).*(1 + cssqinv*cdotu + 0.5*cssqinv^2*cdotu.^2 - 0.5*cssqinv*udotu);
+            geq(:, :, k) = w(k)*C_BGK_inamuro(:,:,l).*(1 + cssqinv*cdotu + 0.5*cssqinv^2*cdotu.^2 - 0.5*cssqinv*udotu);
         end
     
         if mod(t, 150) == 0
@@ -149,6 +171,6 @@ for l = 1:grids
 end
 
 %% Saving C to file:
-save /Users/jpritch/Documents/MATLAB/benchmarks/benchmark_2/C C
+save /Users/jpritch/Documents/MATLAB/benchmarks/benchmark_2/C_inamuro C_BGK_inamuro
 
 
