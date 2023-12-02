@@ -37,7 +37,6 @@ contour(x/ny,y/ny,C_exact, [0.2 0.4 0.6 0.8], 'k', LineWidth=0.7)
 clabel(C,h,'FontSize',18, 'LabelSpacing',2000)
 xlabel('${x/N_y}$','interpreter','latex', fontsize=26) 
 ylabel('${y/N_y}$','interpreter','latex', fontsize=26)
-% axis want not equal
 xlim([0 10])
 ylim([0 1])
 leg = legend({'Analytical', 'BGK', '', ''}, 'interpreter','latex', ...

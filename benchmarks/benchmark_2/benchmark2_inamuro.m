@@ -53,55 +53,29 @@ for i=1:64
     end
 end
 mask64 = mask64col(1:64,1:64)+mask64row(1:64,1:64);
-mask65 = mask64col+mask64row;
 for i=1:64
     for j=1:64
         if mask64(i,j) == 2
             mask64(i,j) = 1;
         end
-        if mask65(i+1,j+1) == 2
-            mask65(i+1,j+1) = 1;
-        end
     end
 end
 
-C_BGK_inamuro(1:64,1:64,1) = mask64(1:64,1:64);
-C_BGK_inamuro(1:64,65:128,1) = mask64(1:64,64:-1:1);
-C_BGK_inamuro(65:128,1:64,1) = mask64(64:-1:1,1:64);
-C_BGK_inamuro(65:128,65:128,1) = mask64(64:-1:1,64:-1:1);
+mask(1:64,1:64) = mask64(1:64,1:64);
+mask(1:64,65:128) = mask64(1:64,64:-1:1);
+mask(65:128,1:64) = mask64(64:-1:1,1:64);
+mask(65:128,65:128) = mask64(64:-1:1,64:-1:1);
 
+C_BGK_inamuro(:,:,1) = mask;
 C_BGK_inamuro(:,:,2) = C_BGK_inamuro(:,:,1);
-mask = C_BGK_inamuro(:,:,1);
 
 [row,col] = find(mask == 1);
 
-mask2 = zeros(nx,ny);
-mask64row_2 = mask2(1:65,1:65);
-mask64col_2 = mask2(1:65,1:65);
-for i=1:64
-    for j=1:64
-        if mask64row(i,j) == 1
-            mask64row_2(1:(i-1),j) = 2;
-        end
-        if mask64col(i,j) == 1
-            mask64col_2(i,1:(j-1)) = 2;
-        end
-    end
-end
-mask64_2 = mask64col_2(1:64,1:64)+mask64row_2(1:64,1:64);
-for i=1:64
-    for j=1:64
-        if mask64_2(i,j) == 4
-            mask64_2(i,j) = 2;
-        end
-    end
-end
-
-
-heatmap(mask64)
+heatmap(mask)
 
 ux = zeros(nx, ny);
 uy = zeros(nx, ny);
+
 
 %% Simulating using LBM
 % Initialisation of the particle distribution function
@@ -142,14 +116,20 @@ for l = 1:grids
         end
     
         % Boundary conditions
-        % opp = [0 2 1 4 3 7 8 5 6];
-        % for i = 1:length(row)
-        %     for k = 1:ndir
-        %         g(col(i),row(i),opp(k)+1) = -gcol(col(i),row(i),k) + 2*w(k) * C_c;
-        %     end
-        % end
-
-        % C_dash = 
+        for i = 1:length(row)
+            if mask(col(i)-1,row(i)-1) == 0 && mask(col(i)-1,row(i)  ) == 0 && ...
+               mask(col(i)-1,row(i)+1) == 0 && mask(col(i)  ,row(i)-1) == 0 && ...
+               mask(col(i)  ,row(i)  ) == 0 && mask(col(i)  ,row(i)+1) == 0 && ...
+               mask(col(i)+1,row(i)-1) == 0 && mask(col(i)+1,row(i)  ) == 0 && ...
+               mask(col(i)+1,row(i)+1) == 0
+                k_in = [];
+                k_out = [];
+            end
+            for k = 1:ndir
+                % g(col(i),row(i),opp(k)+1) = -gcol(col(i),row(i),k) + 2*w(k) * C_c;
+                % C_dash = (C_c-gsum)/wsum;
+            end
+        end
     
         % Macroscopic variables
         C_BGK_inamuro(:,:,l) = g(:, :, 1) + g(:, :, 2) + g(:, :, 3) + g(:, :, 4) + g(:, :, 5)...
@@ -169,6 +149,7 @@ for l = 1:grids
     end
 
 end
+
 
 %% Saving C to file:
 save /Users/jpritch/Documents/MATLAB/benchmarks/benchmark_2/C_inamuro C_BGK_inamuro

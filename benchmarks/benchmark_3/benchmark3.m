@@ -6,7 +6,7 @@ C_p = 1;
 u_0 = 0.05;
 nx = 1600;
 ny = 160;
-niter = 20000; % 15000 took my computer over 28 minutes
+niter = 50000; % This took my computer about 90 minutes
 
 % Vectors
 x = 1:nx;
@@ -31,6 +31,7 @@ C(1,:) = C_p;
 
 ux = zeros(ny, nx) + u_0;
 uy = zeros(ny, nx);
+
 
 %% Simulating using LBM
 % Initialisation of the particle distribution function

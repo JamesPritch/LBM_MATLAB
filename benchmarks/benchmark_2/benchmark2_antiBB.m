@@ -65,18 +65,19 @@ for i=1:64
     end
 end
 
-C_BGK_antiBB(1:64,1:64,1) = mask64(1:64,1:64);
-C_BGK_antiBB(1:64,65:128,1) = mask64(1:64,64:-1:1);
-C_BGK_antiBB(65:128,1:64,1) = mask64(64:-1:1,1:64);
-C_BGK_antiBB(65:128,65:128,1) = mask64(64:-1:1,64:-1:1);
+mask(1:64,1:64) = mask64(1:64,1:64);
+mask(1:64,65:128) = mask64(1:64,64:-1:1);
+mask(65:128,1:64) = mask64(64:-1:1,1:64);
+mask(65:128,65:128) = mask64(64:-1:1,64:-1:1);
 
+C_BGK_antiBB(:,:,1) = mask;
 C_BGK_antiBB(:,:,2) = C_BGK_antiBB(:,:,1);
-mask = C_BGK_antiBB(:,:,1);
 
 [row,col] = find(mask == 1);
 
 ux = zeros(nx, ny);
 uy = zeros(nx, ny);
+
 
 %% Simulating using LBM
 % Initialisation of the particle distribution function

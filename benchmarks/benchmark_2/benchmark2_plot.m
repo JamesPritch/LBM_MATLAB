@@ -45,34 +45,42 @@ end
 %% Plotting C against r/a
 % Plotting parameters
 xplot = 0:1/40:1;
+xplot(1) = 1e-17;
 C_plot_exact = zeros(2,41);
 C_plot_exact(1,:) = C_exact(64,65:105,1);
 C_plot_exact(2,:) = C_exact(64,65:105,2);
 C_BGK_plot_antiBB = zeros(2,41);
 C_BGK_plot_antiBB(1,:) = (C_BGK_antiBB(64,65:105,1) + C_BGK_antiBB(65,65:105,1))/2;
 C_BGK_plot_antiBB(2,:) = (C_BGK_antiBB(64,65:105,2) + C_BGK_antiBB(65,65:105,2))/2;
+% C_BGK_plot_inamuro = zeros(2,41);
+% C_BGK_plot_inamuro(1,:) = (C_BGK_inamuro(64,65:105,1) + C_BGK_inamuro(65,65:105,1))/2;
+% C_BGK_plot_inamuro(2,:) = (C_BGK_inamuro(64,65:105,2) + C_BGK_inamuro(65,65:105,2))/2;
 
 % Plotting C_exact and C_BGK Concentration profiles
 figure;
 axes('FontSize',18, 'NextPlot', 'add');
-plot(xplot, C_plot_exact(1,:), 'k', ...
-    xplot, C_BGK_plot_antiBB(1,:), 'squarek', ...
-    xplot, C_plot_exact(2,:), ':k', ...
-    xplot, C_BGK_plot_antiBB(2,:), 'diamondk')
+plot(xplot, C_plot_exact(1,:), 'k')
+scatter(xplot, C_BGK_plot_antiBB(1,:), 50, 'diamondk', 'filled')
+scatter(xplot, C_BGK_plot_antiBB(1,:), 50, 'squarek', 'filled')
+plot(xplot, C_plot_exact(2,:), ':k')
+scatter(xplot, C_BGK_plot_antiBB(2,:), 50, 'diamondk')
+scatter(xplot, C_BGK_plot_antiBB(2,:), 50, 'squarek')
 % title("Concentration profile for Benchmark 2", FontSize=20)
 xlabel('${r/a}$','interpreter','latex', fontsize=26) 
 ylabel('${C/C_c}$','interpreter','latex', fontsize=26)
 xlim([0 1])
 ylim([0 1])
 leg = legend('${\hat{t} = 0.0547}$ (Analytical)', '${\hat{t} = 0.0547}$ (AntiBB)', ...
+    '${\hat{t} = 0.0547}$ (Inamuro)', ...
     '${\hat{t} = 0.1095}$ (Analytical)', '${\hat{t} = 0.1095}$ (AntiBB)', ...
+    '${\hat{t} = 0.1095}$ (Inamuro)', ...
     'interpreter','latex', 'Location','northwest', fontsize = 18);
 leg.ItemTokenSize = [12,12,12];
 
 
 % Plotting C_BGK
 % figure;
-% contour(C_BGK(:,:,1))
+% contour(C_BGK_inamuro(:,:,1))
 
 % Plotting mask
 % figure;
