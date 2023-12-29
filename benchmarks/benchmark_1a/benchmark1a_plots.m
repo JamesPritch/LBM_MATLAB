@@ -1,4 +1,5 @@
 %% Plotting of Benchmark 1a: advection-diffusion of a Gaussian hill
+%% Finding analytical solution
 % Load vars from simulation 
 x = readmatrix("1a_x.txt");
 y = readmatrix("1a_y.txt");
@@ -21,7 +22,11 @@ xsqr = (x - x_0 - ux * t).^2;
 ysqr = transpose((y - y_0 - uy * t).^2);
 C_exact = omega_term * C_0 * exp( - (xsqr + ysqr) / (2 * (omega_0sqr+omega_Dsqr)));
 
+% Error in C
+Error = norm(C_BGK - C_exact, 'fro')/norm(C_exact, 'fro');
 
+
+%% Plotting
 % Plotting C against x
 figure;
 axes('FontSize',16, 'NextPlot', 'add');
@@ -32,7 +37,6 @@ ylabel('${C/C_0}$','interpreter','latex', fontsize=26)
 xlim([100 300])
 leg = legend('Analytical', 'BGK', 'interpreter','latex', fontsize = 18);
 leg.ItemTokenSize = [25,25,25];
-
 
 % Plotting concentration contour plot 
 figure;

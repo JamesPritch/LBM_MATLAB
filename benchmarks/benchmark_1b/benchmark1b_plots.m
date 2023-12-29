@@ -22,13 +22,17 @@ xsqr = (x - x_0 - ux * t).^2;
 ysqr = transpose((y - y_0 - uy * t).^2);
 C_exact = omega_term * C_0 * exp( - (xsqr + ysqr) / (2 * (omega_0sqr+omega_Dsqr)));
 
+% Error in C
+Error = norm(C_BGK - C_exact, 'fro')/norm(C_exact, 'fro');
+
+
 %% Plotting
 % Plotting C against x
 figure;
 axes('FontSize',16, 'NextPlot', 'add');
 plot(x, C_exact(220,:), 'k', x,C_BGK(220,:), 'k--')
 % title("Concentration profile 1b", FontSize=20)
-xlabel('${x\Delta x}$','interpreter','latex', fontsize=26) 
+xlabel('${x/\Delta x}$','interpreter','latex', fontsize=26) 
 ylabel('${C/C_0}$','interpreter','latex', fontsize=26)
 xlim([180 260])
 leg = legend('Analytical', 'BGK', 'interpreter','latex', fontsize = 18);

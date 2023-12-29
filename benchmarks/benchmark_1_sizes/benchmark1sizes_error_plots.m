@@ -22,6 +22,7 @@ uy_all = [0.2 0.1 0.05 0.025 0.0125];
 
 % Matrices
 Error = zeros(1,grids);
+C_exact = cell(grids, 1);
 
 
 %% Loop to over grid sizes
@@ -50,10 +51,13 @@ end
 %% Plotting
 x = 1:2000;
 figure;
-loglog([32 64 128 256 512], [Error(1) Error(2) Error(3) Error(4) Error(5)], ...
-    'ko', x,4*x.^-1, 'k:', x,1000*x.^-2, 'k')
+lg = loglog([32 64 128 256 512], [Error(1) Error(2) Error(3) Error(4) Error(5)], ...
+    'ko', x,4*x.^-1, 'k:', x,1000*x.^-2, 'k');
+lg(1).LineWidth = 1;
+lg(2).LineWidth = 1;
+lg(3).LineWidth = 1;
 xlabel('Side Length of Square Domain (l.u.)','interpreter','latex', fontsize=26) 
-ylabel('${L_2}$ error in ${C}$','interpreter','latex', fontsize=26)
+ylabel('Error in ${C}$ (${l^2}$-norm)','interpreter','latex', fontsize=26)
 xlim([10 2000])
 ylim([10e-5 10e-0])
 leg = legend('Simulations', 'First order Convergence', 'Second order Convergence', ...
