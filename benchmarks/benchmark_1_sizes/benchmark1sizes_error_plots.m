@@ -56,12 +56,12 @@ lg = loglog([32 64 128 256 512], [Error(1) Error(2) Error(3) Error(4) Error(5)],
 lg(1).LineWidth = 1;
 lg(2).LineWidth = 1;
 lg(3).LineWidth = 1;
-xlabel('Side Length of Square Domain (l.u.)','interpreter','latex', fontsize=26) 
-ylabel('Error in ${C}$ (${l^2}$-norm)','interpreter','latex', fontsize=26)
+xlabel('Side Length of Square Domain (l.u.)','interpreter','latex', fontsize=23) 
+ylabel('Error in ${C}$ (${l^2}$-norm)','interpreter','latex', fontsize=23)
 xlim([10 2000])
 ylim([10e-5 10e-0])
-leg = legend('Simulations', 'First order Convergence', 'Second order Convergence', ...
-             'interpreter','latex', fontsize = 16);
+leg = legend('Simulations', 'First order convergence', 'Second order convergence', ...
+             'interpreter','latex', fontsize = 17);
 leg.ItemTokenSize = [12,12,12];
 
 

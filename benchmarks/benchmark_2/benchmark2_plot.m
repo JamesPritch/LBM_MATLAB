@@ -58,24 +58,25 @@ C_BGK_plot_antiBB(2,:) = (C_BGK_antiBB(64,65:105,2) + C_BGK_antiBB(65,65:105,2))
 
 % Plotting C_exact and C_BGK Concentration profiles
 figure;
-axes('FontSize',18, 'NextPlot', 'add');
-plot(xplot, C_plot_exact(1,:), 'k')
+axes('FontSize',14, 'NextPlot', 'add');
+plot(xplot, C_plot_exact(1,:), 'k', LineWidth=1)
 scatter(xplot, C_BGK_plot_antiBB(1,:), 50, 'diamondk', 'filled')
-scatter(xplot, C_BGK_plot_antiBB(1,:), 50, 'squarek', 'filled')
-plot(xplot, C_plot_exact(2,:), ':k')
+%scatter(xplot, C_BGK_plot_antiBB(1,:), 50, 'squarek', 'filled')
+plot(xplot, C_plot_exact(2,:), ':k', LineWidth=1)
 scatter(xplot, C_BGK_plot_antiBB(2,:), 50, 'diamondk')
-scatter(xplot, C_BGK_plot_antiBB(2,:), 50, 'squarek')
+%scatter(xplot, C_BGK_plot_antiBB(2,:), 50, 'squarek')
 % title("Concentration profile for Benchmark 2", FontSize=20)
-xlabel('${r/a}$','interpreter','latex', fontsize=26) 
-ylabel('${C/C_c}$','interpreter','latex', fontsize=26)
+xlabel('${r/a}$','interpreter','latex', fontsize=23) 
+ylabel('${C/C_c}$','interpreter','latex', fontsize=23)
 xlim([0 1])
 ylim([0 1])
-leg = legend('${\hat{t} = 0.0547}$ (Analytical)', '${\hat{t} = 0.0547}$ (AntiBB)', ...
-    '${\hat{t} = 0.0547}$ (Inamuro)', ...
-    '${\hat{t} = 0.1095}$ (Analytical)', '${\hat{t} = 0.1095}$ (AntiBB)', ...
-    '${\hat{t} = 0.1095}$ (Inamuro)', ...
-    'interpreter','latex', 'Location','northwest', fontsize = 18);
+leg = legend('${\hat{t} = 0.0547}$ (Analytical)', '${\hat{t} = 0.0547}$ (Numerical)', ...
+    '${\hat{t} = 0.1095}$ (Analytical)', '${\hat{t} = 0.1095}$ (Numerical)', ...
+    'interpreter','latex', 'Location','northwest', fontsize = 17);
+%    '${\hat{t} = 0.1095}$ (Inamuro)', ...
+%    '${\hat{t} = 0.0547}$ (Inamuro)', ...
 leg.ItemTokenSize = [12,12,12];
+box on
 
 
 % Plotting C_BGK

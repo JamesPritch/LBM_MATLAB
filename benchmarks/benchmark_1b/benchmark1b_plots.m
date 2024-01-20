@@ -29,33 +29,35 @@ Error = norm(C_BGK - C_exact, 'fro')/norm(C_exact, 'fro');
 %% Plotting
 % Plotting C against x
 figure;
-axes('FontSize',16, 'NextPlot', 'add');
-plot(x, C_exact(220,:), 'k', x,C_BGK(220,:), 'k--')
+axes('FontSize',18, 'NextPlot', 'add');
+plot(x, C_exact(220,:), 'k', x,C_BGK(220,:), 'k--', LineWidth=1)
 % title("Concentration profile 1b", FontSize=20)
-xlabel('${x/\Delta x}$','interpreter','latex', fontsize=26) 
-ylabel('${C/C_0}$','interpreter','latex', fontsize=26)
+xlabel('${x/\Delta x}$','interpreter','latex', fontsize=30) 
+ylabel('${C/C_0}$','interpreter','latex', fontsize=30)
 xlim([180 260])
-leg = legend('Analytical', 'BGK', 'interpreter','latex', fontsize = 18);
+leg = legend('Analytical', 'Numerical', 'interpreter','latex', fontsize = 22);
 leg.ItemTokenSize = [25,25,25];
+box on
 
 
 % Plotting concentration contour plot 
 figure;
-axes('FontSize',16, 'NextPlot', 'add');
+axes('FontSize',18, 'NextPlot', 'add');
 plot(1:2,1:2,'k');
 plot(1:2,1:2,'k--');
-contour(C_exact, [0.2 0.4 0.6 0.8], 'k', LineWidth=0.7)
-[C,h] = contour(C_BGK, [0.2 0.4 0.6 0.8], 'k--', LineWidth=0.7);
-clabel(C,h,'FontSize',18, 'LabelSpacing',1000)
+contour(C_exact, [0.2 0.4 0.6 0.8], 'k', LineWidth=1)
+[C,h] = contour(C_BGK, [0.2 0.4 0.6 0.8], 'k--', LineWidth=1);
+clabel(C,h,'FontSize',19, 'LabelSpacing',1000)
 % title("Concentration contour plot 1b", FontSize=20)
-xlabel('${x/\Delta x}$','interpreter','latex', fontsize=26) 
-ylabel('${y/\Delta x}$','interpreter','latex', fontsize=26)
+xlabel('${x/\Delta x}$','interpreter','latex', fontsize=30) 
+ylabel('${y/\Delta y}$','interpreter','latex', fontsize=30)
 axis equal
 xlim([195 245])
 ylim([195 245])
-leg = legend({'Analytical', 'BGK', '', ''}, 'interpreter','latex', ...
-    fontsize = 18);
+leg = legend({'Analytical', 'Numerical', '', ''}, 'interpreter','latex', ...
+    fontsize = 22);
 leg.ItemTokenSize = [25,25,25];
+box on
 
 
 

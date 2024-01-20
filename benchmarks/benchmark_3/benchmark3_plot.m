@@ -29,19 +29,20 @@ end
 %% Plotting C contours
 % Plotting C_exact and C_BGK Concentration contours 
 figure;
-axes('FontSize',16, 'NextPlot', 'add');
+axes('FontSize',11.5, 'NextPlot', 'add');
 plot(1:2,1:2,'k');
 plot(1:2,1:2,'k--');
-contour(x/ny,y/ny,C_exact, [0.2 0.4 0.6 0.8], 'k', LineWidth=0.7)
-[C,h] = contour(x/ny,y/ny,C_BGK, [0.2 0.4 0.6 0.8], 'k--', LineWidth=0.7);
-clabel(C,h,'FontSize',18, 'LabelSpacing',2000)
-xlabel('${x/N_y}$','interpreter','latex', fontsize=26) 
-ylabel('${y/N_y}$','interpreter','latex', fontsize=26)
+contour(x/ny,y/ny,C_exact, [0.2 0.4 0.6 0.8], 'k', LineWidth=0.9)
+[C,h] = contour(x/ny,y/ny,C_BGK, [0.2 0.4 0.6 0.8], 'k--', LineWidth=0.9);
+clabel(C,h,'manual', 'FontSize',12, 'LabelSpacing',502, 'Rotation',0)
+xlabel('${x/N_y}$','interpreter','latex', fontsize=19)
+ylabel('${y/N_y}$','interpreter','latex', fontsize=19)
 xlim([0 10])
 ylim([0 1])
-leg = legend({'Analytical', 'BGK', '', ''}, 'interpreter','latex', ...
-    fontsize = 18);
+leg = legend({'Analytical', 'Numerical', '', ''}, 'interpreter','latex', ...
+    fontsize = 14);
 leg.ItemTokenSize = [25,25,25];
+box on
 
 % Plotting C_BGK
 % figure;
