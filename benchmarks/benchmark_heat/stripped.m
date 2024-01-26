@@ -4,11 +4,11 @@
 % Scalars
 nx = 64;
 ny = 64;
-niter = 10;
-R = 1e-2; % 8.3 in Joules, it's 1.987 in calories, 8.2e-5
-T_0 = 0.0005; % This is average between 0ºC and 20ºC ie 10ºC 
-T_c = 0.00045; % Set to non-dim and find proper non-dim later
-T_h = 0.00055;
+niter = 100;
+R = 1; % 8.3 in Joules, it's 1.987 in calories, 8.2e-5
+T_0 = 0.005; % This is average between 0ºC and 20ºC ie 10ºC 
+T_c = 0.0045; % Set to non-dim and find proper non-dim later
+T_h = 0.0055;
 rho_0 = 1.00005;
 e_0 = R * T_0;
 beta = 1e-4; % Check hand calculation of this 100
@@ -21,15 +21,15 @@ y = 1:ny;
 % Matrices
 rho = zeros(ny,nx) + rho_0; % Density
 e = zeros(ny,nx) + e_0; % Internal energy
-e(:, 1) = R * T_c;
-e(:,ny) = R * T_h;
+e(:, 1) = R*T_c;
+e(:,ny) = R*T_h;
 
 % D2Q9 velocity set parameters
 ndir = 9;
 c_s = sqrt(1/3);
-c = sqrt(3*R*T_0); % Assuming T is constant throughout (it isn't)
-zeta_x = c*[0, 1, -1, 0, 0, 1, -1, -1, 1];
-zeta_y = c*[0, 0, 0, 1, -1, 1, 1, -1, -1];
+c = 1; % Assuming T is constant throughout (it isn't)
+zeta_x = [0, 1, -1, 0, 0, 1, -1, -1, 1];
+zeta_y = [0, 0, 0, 1, -1, 1, 1, -1, -1];
 w = [4/9, 1/9, 1/9, 1/9, 1/9, 1/36, 1/36, 1/36, 1/36];
 
 % Simulation parameters - built
@@ -55,11 +55,8 @@ F = zeros(ny,nx,ndir);
 % Initialisation of the particle distribution function
 % Fluid density f
 feq = zeros(ny, nx, ndir);
-udotu = ux.^2 + uy.^2;
 for k = 1:ndir
-    zdotu = zeta_x(k)*ux + zeta_y(k)*uy;
-    feq(:, :, k) = w(k)*rho.*(1 + 3*zdotu/(c^2) + 9*zdotu.^2/(c^4) ...
-                              - 1.5*udotu/(c^2));
+    feq(:, :, k) = w(k)*rho;
 end
 f = feq;
 fcol = zeros(ny, nx, ndir);
@@ -68,14 +65,10 @@ fcol = zeros(ny, nx, ndir);
 geq = zeros(ny, nx, ndir);
 geq(:, :, 1) = 0;
 for k = 2:5
-    zdotu = zeta_x(k)*ux + zeta_y(k)*uy;
-    geq(:, :, k) = rho.* e ./ 9 .* (1.5 + 1.5*zdotu./(c^2) + 2.25*zdotu.^2/(c^4) ...
-                                  - 1.5*udotu./(c^2));
+    geq(:, :, k) = rho.* e / 9 * 1.5;
 end
 for k = 6:9
-    zdotu = zeta_x(k)*ux + zeta_y(k)*uy;
-    geq(:, :, k) = rho.* e ./ 36 .* (3 + 6*zdotu./(c^2) + 4.5*zdotu.^2/(c^4) ...
-                                  - 1.5*udotu./(c^2));
+    geq(:, :, k) = rho.* e / 36 * 3;
 end
 g = geq;
 gcol = zeros(ny, nx, ndir);
@@ -94,11 +87,11 @@ for t = 1:niter
     for k = 1:ndir
         for i = 1:ny
             for j = 1:nx
-                xstreamed = mod(j + zeta_x(k)/c, nx);
+                xstreamed = mod(j + zeta_x(k), nx);
                 if xstreamed == 0
                     xstreamed = nx;
                 end
-                ystreamed = mod(i + zeta_y(k)/c, ny);
+                ystreamed = mod(i + zeta_y(k), ny);
                 if ystreamed == 0
                     ystreamed = ny;
                 end
@@ -110,11 +103,15 @@ for t = 1:niter
     % Boundary conditions for f
     % LHS Boundary ie u = 0
     % for i = 1:ny
-    %     f(i,1,:) = 0;
+    %     for k = [2 6 9]
+    %         f(i,1,k) = 0;
+    %     end
     % end
     % RHS Boundary ie u = 0
     % for i = 1:ny
-    %     f(i,nx,:) = 0;
+    %     for k = [4 7 8]
+    %         f(i,nx,:) = 0;
+    %     end
     % end
     % Top Boundary ie Anti-BB
     % opp = [0 2 1 4 3 7 8 5 6];
@@ -145,11 +142,8 @@ for t = 1:niter
     uy = rho_x_uy ./ rho;
 
     % Equilibrium distribution function for f
-    udotu = ux.^2 + uy.^2;
     for k = 1:ndir
-        zdotu = zeta_x(k)*ux + zeta_y(k)*uy;
-        feq(:, :, k) = w(k)*rho.*(1 + 3*zdotu/(c^2) + 9*zdotu.^2/(c^4) ...
-                                  - 1.5*udotu/(c^2));
+        feq(:, :, k) = w(k)*rho;
     end
 
     
@@ -163,11 +157,11 @@ for t = 1:niter
     for k = 1:ndir
         for i = 1:ny
             for j = 1:nx
-                xstreamed = mod(j + zeta_x(k)/c, nx);
+                xstreamed = mod(j + zeta_x(k), nx);
                 if xstreamed == 0
                     xstreamed = nx;
                 end
-                ystreamed = mod(i + zeta_y(k)/c, ny);
+                ystreamed = mod(i + zeta_y(k), ny);
                 if ystreamed == 0
                     ystreamed = ny;
                 end
@@ -178,26 +172,26 @@ for t = 1:niter
 
 
     % Boundary conditions for g
-    % LHS Boundary ie T = T_h
+    % LHS Boundary ie T = T_c
     for i = 1:ny
         for j = 1
             for k = [2 6 9]
-                Tdash = (12/(2+3*uy(i))) * (T_c - g(i,j,1) - g(i,j,3) - g(i,j,4) ...
+                Tdash = (12/(2+3*uy(i))) .* (T_c - g(i,j,1) - g(i,j,3) - g(i,j,4) ...
                                             - g(i,j,5) - g(i,j,7) - g(i,j,8));
-                g(i,j,k) = w(k) * 1 * (1+3*uy(i));
+                g(i,j,k) = w(k) * Tdash .* (1+3*uy(i));
             end
         end
     end
-    % RHS Boundary ie T = T_c
-    % for i = 1:ny
-    %     for j = nx
-    %         for k = [4 7 8]
-    %             Tdash = (12/(2+3*uy(i))) * (T_h - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
-    %                                         - g(i,j,5) - g(i,j,6) - g(i,j,9));
-    %             g(i,j,k) = w(k) * 1 * (1 + 3*uy(i));
-    %         end
-    %     end
-    % end
+    % RHS Boundary ie T = T_h
+    for i = 1:ny
+        for j = nx
+            for k = [4 7 8]
+                Tdash = (12/(2+3*uy(i))) .* (T_h - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
+                                            - g(i,j,5) - g(i,j,6) - g(i,j,9));
+                g(i,j,k) = w(k) * Tdash .* (1+3*uy(i));
+            end
+        end
+    end
     % Top Boundary ie Anti-BB
     % opp = [0 2 1 4 3 7 8 5 6];
     % for i = ny
@@ -220,37 +214,32 @@ for t = 1:niter
 
     % Macroscopic variables from g
     
-    
     rho_x_e = g(:, :, 1) + g(:, :, 2) + g(:, :, 3) + g(:, :, 4) + g(:, :, 5)...
             + g(:, :, 6) + g(:, :, 7) + g(:, :, 8) + g(:, :, 9);
+    
+    e = rho_x_e./rho;
     % figure;
     % heatmap(T)
-    e = rho_x_e./rho;
     T = e/R;
-    figure;
-    heatmap(T)
-    
+    % figure;
+    % heatmap(T)
     
     
 
     % Equilibrium distribution function for g
-    udotu = ux.^2 + uy.^2;
-    geq(:, :, 1) = -rho.* e * udotu / (3 * c^2);
+    geq(:, :, 1) = 0;
     for k = 2:5
-        zdotu = zeta_x(k)*ux + zeta_y(k)*uy;
-        geq(:, :, k) = rho.* e / 9 .* (1.5 + 1.5*zdotu/(c^2) + 2.25*zdotu.^2/(c^4) ...
-                                      - 1.5*udotu/(c^2));
+        geq(:, :, k) = rho.* e / 9 * 1.5;
     end
     for k = 6:9
         zdotu = zeta_x(k)*ux + zeta_y(k)*uy;
-        geq(:, :, k) = rho.* e / 36 .* (3 + 6*zdotu/(c^2) + 4.5*zdotu.^2/(c^4) ...
-                                      - 1.5*udotu/(c^2));
+        geq(:, :, k) = rho.* e / 36 * 3;
     end
 
 
     % Force computation
     G(:,:,3) = rho(:,:) * beta * (T(:,:) - T_0).* grav;
-    F(:,:,3) = (G(:,:,3).*(zeta_x(3) - ux - uy)./T*R) .* feq(:, :, 3);
+    F(:,:,3) = (G(:,:,3).*zeta_x(3)./T*R) .* feq(:, :, 3);
 
     
     if mod(t, 10) == 0
@@ -262,7 +251,7 @@ end
 
 
 %% Saving T to file:
-save /Users/jpritch/Documents/MATLAB/benchmarks/benchmark_heat/T T
+save /Users/jpritch/Documents/MATLAB/benchmarks/benchmark_heat/T2 T
 
 
 

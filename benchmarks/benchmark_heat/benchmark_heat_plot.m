@@ -1,6 +1,6 @@
 %% Plotting of Benchamrk 1 with different grid sizes
 %% Read C_BGK from file
-load /Users/jpritch/Documents/MATLAB/benchmarks/benchmark_heat/T
+load /Users/jpritch/Documents/MATLAB/benchmarks/benchmark_heat/T2
 
 
 
@@ -46,7 +46,7 @@ load /Users/jpritch/Documents/MATLAB/benchmarks/benchmark_heat/T
 
 % Plotting C_BGK
 figure;
-contour(T)
+heatmap(T)
 
 
 
