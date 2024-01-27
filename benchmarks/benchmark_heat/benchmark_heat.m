@@ -182,22 +182,22 @@ for t = 1:niter
     for i = 1:ny
         for j = 1
             for k = [2 6 9]
-                Tdash = (12/(2+3*uy(i))) * (T_c - g(i,j,1) - g(i,j,3) - g(i,j,4) ...
+                Tdash = (12/(2+3*uy(i))) * (T_h - g(i,j,1) - g(i,j,3) - g(i,j,4) ...
                                             - g(i,j,5) - g(i,j,7) - g(i,j,8));
                 g(i,j,k) = w(k) * 1 * (1+3*uy(i));
             end
         end
     end
     % RHS Boundary ie T = T_c
-    % for i = 1:ny
-    %     for j = nx
-    %         for k = [4 7 8]
-    %             Tdash = (12/(2+3*uy(i))) * (T_h - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
-    %                                         - g(i,j,5) - g(i,j,6) - g(i,j,9));
-    %             g(i,j,k) = w(k) * 1 * (1 + 3*uy(i));
-    %         end
-    %     end
-    % end
+    for i = 1:ny
+        for j = nx
+            for k = [4 7 8]
+                Tdash = (12/(2+3*uy(i))) * (T_c - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
+                                            - g(i,j,5) - g(i,j,6) - g(i,j,9));
+                g(i,j,k) = w(k) * 1 * (1 + 3*uy(i));
+            end
+        end
+    end
     % Top Boundary ie Anti-BB
     % opp = [0 2 1 4 3 7 8 5 6];
     % for i = ny
@@ -227,8 +227,8 @@ for t = 1:niter
     % heatmap(T)
     e = rho_x_e./rho;
     T = e/R;
-    figure;
-    heatmap(T)
+    % figure;
+    % heatmap(T)
     
     
     

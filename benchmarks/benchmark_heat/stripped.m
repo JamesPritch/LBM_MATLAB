@@ -4,19 +4,19 @@
 % Scalars
 nx = 64;
 ny = 64;
-niter = 100;
-R = 1; % 8.3 in Joules, it's 1.987 in calories, 8.2e-5
-T_0 = 0.005; % This is average between 0ºC and 20ºC ie 10ºC 
-T_c = 0.0045; % Set to non-dim and find proper non-dim later
-T_h = 0.0055;
-rho_0 = 1.00005;
+niter = 600;
+R = 1; % 8.3 in Joules, it's 1.987 in calories, 8.2e-5 really doesn't like not being 1
+T_0 = 0.5; % This is average between 0ºC and 20ºC ie 10ºC 
+T_c = 0.45; % Set to non-dim and find proper non-dim later
+T_h = 0.55; % doesn't seem to like any bigger than this but smaller is fine
+rho_0 = 1.0000005;
 e_0 = R * T_0;
-beta = 1e-4; % Check hand calculation of this 100
+beta = 1e-7; % Check hand calculation of this 100
 grav = 1; % 9.8 in dim, idk for non-dim
 
 % Vectors
-x = 1:nx;
-y = 1:ny;
+x = 0:nx-1;
+y = 0:ny-1;
 
 % Matrices
 rho = zeros(ny,nx) + rho_0; % Density
@@ -172,23 +172,23 @@ for t = 1:niter
 
 
     % Boundary conditions for g
-    % LHS Boundary ie T = T_c
+    % LHS Boundary ie T = T_h
     for i = 1:ny
         for j = 1
             for k = [2 6 9]
-                Tdash = (12/(2+3*uy(i))) .* (T_c - g(i,j,1) - g(i,j,3) - g(i,j,4) ...
+                Tdash = (12/(2)) .* (T_h - g(i,j,1) - g(i,j,3) - g(i,j,4) ...
                                             - g(i,j,5) - g(i,j,7) - g(i,j,8));
-                g(i,j,k) = w(k) * Tdash .* (1+3*uy(i));
+                g(i,j,k) = w(k) * Tdash .* (1);
             end
         end
     end
-    % RHS Boundary ie T = T_h
+    % RHS Boundary ie T = T_c
     for i = 1:ny
         for j = nx
             for k = [4 7 8]
-                Tdash = (12/(2+3*uy(i))) .* (T_h - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
+                Tdash = (12.4/(2)) .* (T_c - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
                                             - g(i,j,5) - g(i,j,6) - g(i,j,9));
-                g(i,j,k) = w(k) * Tdash .* (1+3*uy(i));
+                g(i,j,k) = w(k) * Tdash .* (1);
             end
         end
     end
