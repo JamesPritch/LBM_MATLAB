@@ -56,6 +56,9 @@ C_BGK_plot_antiBB(2,:) = (C_BGK_antiBB(64,65:105,2) + C_BGK_antiBB(65,65:105,2))
 % C_BGK_plot_inamuro(1,:) = (C_BGK_inamuro(64,65:105,1) + C_BGK_inamuro(65,65:105,1))/2;
 % C_BGK_plot_inamuro(2,:) = (C_BGK_inamuro(64,65:105,2) + C_BGK_inamuro(65,65:105,2))/2;
 
+% Error in C
+Error = norm(C_BGK_plot_antiBB - C_plot_exact, 'fro')/norm(C_plot_exact, 'fro');
+
 % Plotting C_exact and C_BGK Concentration profiles
 figure;
 axes('FontSize',14, 'NextPlot', 'add');

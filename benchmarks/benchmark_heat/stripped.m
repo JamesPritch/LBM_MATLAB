@@ -4,15 +4,13 @@
 % Scalars
 nx = 64;
 ny = 64;
-niter = 600;
-R = 1; % 8.3 in Joules, it's 1.987 in calories, 8.2e-5 really doesn't like not being 1
-T_0 = 0.5; % This is average between 0ºC and 20ºC ie 10ºC 
+niter = 1000;
+T_0 = 0.5; % This is average between 0ºC and 20ºC ie 10ºC. likes <1
 T_c = 0.45; % Set to non-dim and find proper non-dim later
 T_h = 0.55; % doesn't seem to like any bigger than this but smaller is fine
 rho_0 = 1.0000005;
-e_0 = R * T_0;
-beta = 1e-7; % Check hand calculation of this 100
-grav = 1; % 9.8 in dim, idk for non-dim
+beta = 1e-7; % Check hand calculation of this 100. likes <1e-2
+grav = 1; % 9.8 in dim, idk for non-dim. likes <10
 
 % Vectors
 x = 0:nx-1;
@@ -20,14 +18,11 @@ y = 0:ny-1;
 
 % Matrices
 rho = zeros(ny,nx) + rho_0; % Density
-e = zeros(ny,nx) + e_0; % Internal energy
-e(:, 1) = R*T_c;
-e(:,ny) = R*T_h;
 
 % D2Q9 velocity set parameters
 ndir = 9;
 c_s = sqrt(1/3);
-c = 1; % Assuming T is constant throughout (it isn't)
+c = 1; % Assuming this is 1
 zeta_x = [0, 1, -1, 0, 0, 1, -1, -1, 1];
 zeta_y = [0, 0, 0, 1, -1, 1, 1, -1, -1];
 w = [4/9, 1/9, 1/9, 1/9, 1/9, 1/36, 1/36, 1/36, 1/36];
@@ -65,10 +60,10 @@ fcol = zeros(ny, nx, ndir);
 geq = zeros(ny, nx, ndir);
 geq(:, :, 1) = 0;
 for k = 2:5
-    geq(:, :, k) = rho.* e / 9 * 1.5;
+    geq(:, :, k) = rho.* T / 9 * 1.5;
 end
 for k = 6:9
-    geq(:, :, k) = rho.* e / 36 * 3;
+    geq(:, :, k) = rho.* T / 36 * 3;
 end
 g = geq;
 gcol = zeros(ny, nx, ndir);
@@ -172,7 +167,7 @@ for t = 1:niter
 
 
     % Boundary conditions for g
-    % LHS Boundary ie T = T_h
+    % LHS Boundary T = T_h using Inamuro
     for i = 1:ny
         for j = 1
             for k = [2 6 9]
@@ -182,16 +177,33 @@ for t = 1:niter
             end
         end
     end
-    % RHS Boundary ie T = T_c
+    % RHS Boundary T = T_c using Inamuro
     for i = 1:ny
         for j = nx
             for k = [4 7 8]
-                Tdash = (12.4/(2)) .* (T_c - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
-                                            - g(i,j,5) - g(i,j,6) - g(i,j,9));
+                Tdash = (12/(2)) .* (T_c*1.0141 - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
+                                         - g(i,j,5) - g(i,j,6) - g(i,j,9));
                 g(i,j,k) = w(k) * Tdash .* (1);
             end
         end
     end
+    % % LHS Boundary T = T_h using Anti-BB
+    % opp = [0 2 1 4 3 7 8 5 6];
+    % for i = 1:ny
+    %     for j = 1
+    %         for k = [2 6 9]
+    %             g(i,j,opp(k)+1) = -gcol(i,j,k) + 2*w(k) * T_h;
+    %         end
+    %     end
+    % end
+    % % RHS Boundary T = T_c using Anti-BB
+    % for i = 1:ny
+    %     for j = nx
+    %         for k = [4 7 8]
+    %             g(i,j,opp(k)+1) = -gcol(i,j,k) + 2*w(k) * T_c;
+    %         end
+    %     end
+    % end
     % Top Boundary ie Anti-BB
     % opp = [0 2 1 4 3 7 8 5 6];
     % for i = ny
@@ -214,35 +226,32 @@ for t = 1:niter
 
     % Macroscopic variables from g
     
-    rho_x_e = g(:, :, 1) + g(:, :, 2) + g(:, :, 3) + g(:, :, 4) + g(:, :, 5)...
+    rho_x_T = g(:, :, 1) + g(:, :, 2) + g(:, :, 3) + g(:, :, 4) + g(:, :, 5)...
             + g(:, :, 6) + g(:, :, 7) + g(:, :, 8) + g(:, :, 9);
-    
-    e = rho_x_e./rho;
     % figure;
     % heatmap(T)
-    T = e/R;
+    T = rho_x_T./rho;
     % figure;
     % heatmap(T)
-    
-    
+
 
     % Equilibrium distribution function for g
     geq(:, :, 1) = 0;
     for k = 2:5
-        geq(:, :, k) = rho.* e / 9 * 1.5;
+        geq(:, :, k) = rho.* T / 9 * 1.5;
     end
     for k = 6:9
         zdotu = zeta_x(k)*ux + zeta_y(k)*uy;
-        geq(:, :, k) = rho.* e / 36 * 3;
+        geq(:, :, k) = rho.* T / 36 * 3;
     end
 
 
     % Force computation
     G(:,:,3) = rho(:,:) * beta * (T(:,:) - T_0).* grav;
-    F(:,:,3) = (G(:,:,3).*zeta_x(3)./T*R) .* feq(:, :, 3);
+    F(:,:,3) = (G(:,:,3).*zeta_x(3)./T) .* feq(:, :, 3);
 
     
-    if mod(t, 10) == 0
+    if mod(t, 100) == 0
         fprintf('Iteration: %d, Time: %f \n', t, toc);
     end
 

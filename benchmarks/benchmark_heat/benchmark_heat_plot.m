@@ -1,6 +1,6 @@
 %% Plotting of Benchamrk 1 with different grid sizes
 %% Read C_BGK from file
-load /Users/jpritch/Documents/MATLAB/benchmarks/benchmark_heat/T2
+load /Users/jpritch/Documents/MATLAB/benchmarks/benchmark_heat/T1
 
 
 
@@ -13,8 +13,8 @@ T_c = 0.45; % Set to non-dim and find proper non-dim later
 T_h = 0.55;
 
 % Vectors
-x = 0:nx-1;
-y = 0:ny-1;
+x = 0:nx-2;
+y = 0:ny-2;
 
 
 %% Finding Analytical Solution for C
@@ -27,27 +27,31 @@ y = 0:ny-1;
 
 %% Plotting C
 % Temperature contour
-% figure;
-% axes('FontSize',11.5, 'NextPlot', 'add');
-% plot(1:2,1:2,'k');
-% % plot(1:2,1:2,'k--');
-% [C,h] = contour(x/(ny-1),y/(ny-1),T, 'k--', LineWidth=0.9);
-% clabel(C,h, 'FontSize',12, 'LabelSpacing',502)
-% xlabel('${x/N_x}$','interpreter','latex', fontsize=19)
-% ylabel('${y/N_y}$','interpreter','latex', fontsize=19)
-% xlim([0 1])
-% ylim([0 1])
-% leg = legend({'Numerical', ''}, 'interpreter','latex', ...
-%     fontsize = 14);
-% leg.ItemTokenSize = [25,25,25];
-% box on
-
-% Temperature cross section
-T_plot = (T(32,:)-T_c)/(T_h-T_c);
 figure;
 axes('FontSize',11.5, 'NextPlot', 'add');
-plot(x/(ny-1),1-y/(ny-1),'k', ...
-     x/(ny-1),T_plot,'ok', LineWidth=0.9);
+plot(1:2,1:2,'k--');
+[C,h] = contour(x/(ny-2),y/(ny-2),T(1:ny-1,1:nx-1), 'k--', LineWidth=0.9);
+clabel(C,h, 'FontSize',12, 'LabelSpacing',502)
+xlabel('${x/N_x}$','interpreter','latex', fontsize=19)
+ylabel('${y/N_y}$','interpreter','latex', fontsize=19)
+xlim([0 1])
+ylim([0 1])
+leg = legend({'Numerical', ''}, 'interpreter','latex', ...
+    fontsize = 14);
+leg.ItemTokenSize = [25,25,25];
+box on
+
+x = 0:nx-2;
+y = 0:ny-2;
+% Temperature cross section
+T_plot = (T(32,1:nx-1)-T_c)/(T_h-T_c);
+% T_plot = (T(32,1:nx)-T_c)/(T_h-T_c);
+figure;
+axes('FontSize',11.5, 'NextPlot', 'add');
+plot(x/(ny-2),1-y/(ny-2),'k', ...
+     x/(ny-2),T_plot,'ok', LineWidth=0.9);
+% plot(x/(ny-1),1-y/(ny-1),'k', ...
+     % x/(ny-1),T_plot,'ok', LineWidth=0.9);
 xlabel('${x/N_x}$','interpreter','latex', fontsize=19)
 ylabel('${\frac{T-T_c}{T_h-T_c}}$','interpreter','latex', fontsize=23)
 axis equal
