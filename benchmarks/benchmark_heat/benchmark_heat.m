@@ -29,7 +29,7 @@ w = [4/9, 1/9, 1/9, 1/9, 1/9, 1/36, 1/36, 1/36, 1/36];
 
 % Simulation parameters - built
 tau_c = 1.24;
-tau_v = 1; % I don't know this, this is a guess
+tau_v = 1; % I don't know this, this is a guess, doesn't seem to make difference
 v = c^2 * (tau_v - 0.5);
 chi = (2/3) * c^2 * (tau_c - 0.5);
 
@@ -105,18 +105,33 @@ for t = 1:niter
     % Boundary conditions for f
     % LHS Boundary ie u = 0
     % for i = 1:ny
-    %     f(i,1,:) = 0;
+    %     ux(i,1) = 0;
+    % end
+    % for i = 1:ny
+    %     for j = 1
+    %         for k = [2 6 9]
+    %             Tdash = (12/(2+3*uy(i))) .* (0 - f(i,j,1) - f(i,j,3) - f(i,j,4) ...
+    %                                              - f(i,j,5) - f(i,j,7) - f(i,j,8));
+    %             f(i,j,k) = w(k) * Tdash .* (1+3*uy(i));
+    %         end
+    %     end
     % end
     % RHS Boundary ie u = 0
     % for i = 1:ny
-    %     f(i,nx,:) = 0;
+    %     for j = nx
+    %         for k = [4 7 8]
+    %             Tdash = (12/(2+3*uy(i))) .* (0 - f(i,j,1) - f(i,j,2) - f(i,j,3) ...
+    %                                         - f(i,j,5) - f(i,j,6) - f(i,j,9));
+    %             f(i,j,k) = w(k) * Tdash .* (1 + 3*uy(i));
+    %         end
+    %     end
     % end
     % Top Boundary ie Anti-BB
     % opp = [0 2 1 4 3 7 8 5 6];
     % for i = ny
     %     for j = 1:nx
-    %         for k = 1:ndir
-    %             f(i,j,opp(k)+1) = -fcol(i,j,k) + 2*w(k) * C_p;
+    %         for k = [3 6 7]
+    %             f(i,j,opp(k)+1) = -fcol(i,j,k);
     %         end
     %     end
     % end
@@ -138,6 +153,20 @@ for t = 1:niter
     rho_x_uy = f(:, :, 4) + f(:, :, 6) + f(:, :, 7) ...
              - (f(:, :, 5) + f(:, :, 8) + f(:, :, 9));
     uy = rho_x_uy ./ rho;
+
+    % Boundary conditions for macroscopic f variables
+    % LHS ie U = 0
+    ux(:,1) = 0;
+    uy(:,1) = 0;
+    % RHS ie U = 0
+    ux(:,nx) = 0;
+    uy(:,nx) = 0;
+    % Top ie U = 0
+    ux(ny,:) = 0;
+    uy(ny,:) = 0;
+    % Bottom ie U = 0
+    ux(nx,:) = 0;
+    uy(nx,:) = 0;
 
     % Equilibrium distribution function for f
     udotu = ux.^2 + uy.^2;
@@ -187,42 +216,27 @@ for t = 1:niter
     for i = 1:ny
         for j = nx
             for k = [4 7 8]
+                % Tdash = (12/(2+3*uy(i))) .* (T_c - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
                 Tdash = (12/(2+3*uy(i))) .* (T_c*1.0141 - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
                                             - g(i,j,5) - g(i,j,6) - g(i,j,9));
                 g(i,j,k) = w(k) * Tdash .* (1 + 3*uy(i));
             end
         end
     end
-    % Top Boundary ie Anti-BB
-    % opp = [0 2 1 4 3 7 8 5 6];
-    % for i = ny
-    %     for j = 1:nx
-    %         for k = 1:ndir
-    %             g(i,j,opp(k)+1) = -gcol(i,j,k) + 2*w(k) * C_p;
-    %         end
-    %     end
-    % end
+    % Top Boundary ie partial C wrt y = 0
+    for i = 1:nx
+        g(ny,i,:) = g(ny-1,i,:);
+    end
     % Bottom Boundary ie Anti-BB
-    % opp = [0 2 1 4 3 7 8 5 6];
-    % for i = 1
-    %     for j = 1:nx
-    %         for k = 1:ndir
-    %             f(i,j,opp(k)+1) = -fcol(i,j,k) + 2*w(k) * C_p;
-    %         end
-    %     end
-    % end
+    for i = 1:nx
+        g(1,i,:) = g(1+1,i,:);
+    end
 
 
     % Macroscopic variables from g
     rho_x_T = g(:, :, 1) + g(:, :, 2) + g(:, :, 3) + g(:, :, 4) + g(:, :, 5)...
             + g(:, :, 6) + g(:, :, 7) + g(:, :, 8) + g(:, :, 9);
-    % figure;
-    % heatmap(T)
     T = rho_x_T./rho;
-    % figure;
-    % heatmap(T)
-    
-    
     
 
     % Equilibrium distribution function for g
@@ -244,7 +258,7 @@ for t = 1:niter
     G(:,:,3) = rho(:,:) * beta * (T(:,:) - T_0).* grav;
     F(:,:,3) = (G(:,:,3).*(zeta_x(3) - ux - uy)./T) .* feq(:, :, 3);
 
-    
+    % Print progress
     if mod(t, 100) == 0
         fprintf('Iteration: %d, Time: %f \n', t, toc);
     end

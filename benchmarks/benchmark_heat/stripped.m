@@ -181,6 +181,7 @@ for t = 1:niter
     for i = 1:ny
         for j = nx
             for k = [4 7 8]
+                % Tdash = (12/(2)) .* (T_c - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
                 Tdash = (12/(2)) .* (T_c*1.0141 - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
                                          - g(i,j,5) - g(i,j,6) - g(i,j,9));
                 g(i,j,k) = w(k) * Tdash .* (1);
