@@ -2,14 +2,16 @@
 %% Setting Grid Independant Variables
 % Simulation parameters - input
 % Scalars
-nx = 64;
+nx = 234;
 ny = 64;
-niter = 10000;
+niter = 1000;
 rho_0 = 1.0000005;
+T_0 = 0.5; % T<1 seems to work
 beta = 1e-7; % Check hand calculation of this 100
-T_0 = 0.5;
-T_c = 0.45; % T<1 seems to work
-T_h = 0.55;
+
+% Boundary condition parameters
+T_c = T_0 - T_0/10; 
+T_h = T_0 + T_0/10;
 u_w = 0;
 v_w = 0;
 u_e = 0;
@@ -235,7 +237,7 @@ for t = 1:niter
 
     % Equilibrium distribution function for g
     udotu = ux.^2 + uy.^2;
-    geq(:, :, 1) = -rho.* T * udotu / (3 * c^2);
+    geq(:, :, 1) = -rho.* T .* udotu / (3 * c^2);
     for k = 2:5
         zdotu = zeta_x(k)*ux + zeta_y(k)*uy;
         geq(:, :, k) = rho.* T / 9 .* (1.5 + 1.5*zdotu/(c^2) + 2.25*zdotu.^2/(c^4) ...
@@ -250,7 +252,7 @@ for t = 1:niter
 
 
     % Force computation
-    G(:,:,3) = rho(:,:) * beta * (T(:,:) - T_0);
+    G(:,:,3) = rho(:,:) * beta .* (T(:,:) - T_0);
     F(:,:,3) = (G(:,:,3).*(zeta_x(3) - ux - uy)./T) .* feq(:, :, 3);
 
 
@@ -264,7 +266,7 @@ end
 
 
 %% Saving T to file:
-save /Users/jpritch/Documents/MATLAB/benchmarks/benchmark_heat/T1 T
+save /Users/jpritch/Documents/MATLAB/model/T1 T
 
 
 

@@ -1,6 +1,6 @@
 %% Plotting of Benchamrk 1 with different grid sizes
 %% Read C_BGK from file
-load /Users/jpritch/Documents/MATLAB/benchmarks/benchmark_heat/T2
+load /Users/jpritch/Documents/MATLAB/benchmarks/benchmark_heat/T1
 
 
 %% Setting Variables
@@ -18,7 +18,7 @@ y = 0:ny-2;
 % y = 0:ny-1;
 
 
-%% Plotting C
+%% Plotting T
 % Temperature contour
 figure;
 axes('FontSize',11.5, 'NextPlot', 'add');
