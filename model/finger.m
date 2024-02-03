@@ -3,15 +3,16 @@
 % Simulation parameters - input
 % Scalars
 nx = 234;
-ny = 64;
-niter = 1000;
+ny = 66;
+niter = 200;
 rho_0 = 1.0000005;
-T_0 = 0.5; % T<1 seems to work
+T_0 = 0.55; % T<1 seems to work
 beta = 1e-7; % Check hand calculation of this 100
+a = 202; % Centre of curve at fingertip
 
 % Boundary condition parameters
-T_c = T_0 - T_0/10; 
-T_h = T_0 + T_0/10;
+T_c = 0.45; 
+T_h = 0.55;
 u_w = 0;
 v_w = 0;
 u_e = 0;
@@ -23,7 +24,11 @@ v_s = 0;
 
 % Vectors
 x = 1:nx;
-y = 1:ny;
+y = (0:ny-1) - ny/2;
+xs = zeros(ny,nx);
+for i = 1:nx
+    xs(:,i) = x(i);
+end
 
 % Matrices
 rho = zeros(ny,nx) + rho_0; % Density
@@ -44,8 +49,6 @@ chi = (2/3) * c^2 * (tau_c - 0.5);
 
 % Initialisation of the temperature and velocity field at time t = 0
 T = zeros(ny, nx) + T_0;
-T(:, 1) = T_c;
-T(:,ny) = T_h;
 
 ux = zeros(ny, nx);
 uy = zeros(ny, nx);
@@ -53,6 +56,85 @@ uy = zeros(ny, nx);
 % Force fields
 G = zeros(ny,nx,ndir);
 F = zeros(ny,nx,ndir);
+
+% Finger outline
+mask = zeros(ny,nx);
+mask(   2,1:a+1) = 1;
+mask(ny-1,1:a+1) = 1;
+r = zeros(ny,nx);
+for i = 1:ny
+    for j = 1:nx
+        r(i,j) = sqrt((x(j)-a)^2+(y(i)+0.5)^2);
+    end
+end
+[row,col] = find(abs(r)>31 & xs >= a & abs(r)<31.9);
+for i = 1:length(row)
+    mask(row(i), col(i)) = 1;
+end
+
+
+for j = a+25:a+31
+    for i = 11:54
+        if mask(i,j) == 1 && mask(i,j+1) == 1
+            mask(i,j+1) = 0;
+        end
+    end
+end
+
+
+% Directions for Inamuro on a curved b.c.
+dir = cell(length(row));
+dir{1} = {5;8;9}; % Setting first two values since algorithm "looks" at
+dir{2} = {4;6;7}; % nodes either side which wouldn't work for 1st nodes
+for i = 3:length(row)
+    if row(i) <= 0.5 * ny
+        if mask(row(i)  ,col(i)-1) == 1 && mask(row(i)  ,col(i)+1) == 1
+            dir{i} = {5;8;9};
+        end
+        if mask(row(i)  ,col(i)-1) == 1 && mask(row(i)+1,col(i)+1) == 1
+            dir{i} = {5;8};
+        end
+        if mask(row(i)-1,col(i)-1) == 1 && mask(row(i)+1,col(i)+1) == 1
+            dir{i} = {3;5;8};
+        end
+        if mask(row(i)-1,col(i)-1) == 1 && mask(row(i)  ,col(i)+1) == 1
+            dir{i} = {3;5;8;9};
+        end
+        if mask(row(i)-1,col(i)-1) == 1 && mask(row(i)+1,col(i)  ) == 1
+            dir{i} = {3;8};
+        end
+        if mask(row(i)-1,col(i)  ) == 1 && mask(row(i)+1,col(i)+1) == 1
+            dir{i} = {3;5;7;8};
+        end
+        if mask(row(i)-1,col(i)  ) == 1 && mask(row(i)+1,col(i)  ) == 1
+            dir{i} = {3;7;8};
+        end
+    end
+    if row(i) > 0.5 * ny
+        if mask(row(i)  ,col(i)-1) == 1 && mask(row(i)  ,col(i)+1) == 1
+            dir{i} = {4;6;7};
+        end
+        if mask(row(i)+1,col(i)-1) == 1 && mask(row(i)  ,col(i)+1) == 1
+            dir{i} = {3;4;6;7};
+        end
+        if mask(row(i)  ,col(i)-1) == 1 && mask(row(i)-1,col(i)+1) == 1
+            dir{i} = {4;7};
+        end
+        if mask(row(i)+1,col(i)-1) == 1 && mask(row(i)-1,col(i)+1) == 1
+            dir{i} = {3;4;7};
+        end
+        if mask(row(i)+1,col(i)-1) == 1 && mask(row(i)-1,col(i)  ) == 1
+            dir{i} = {3;7};
+        end
+        if mask(row(i)+1,col(i)  ) == 1 && mask(row(i)-1,col(i)+1) == 1
+            dir{i} = {3;4;7;8};
+        end
+        if mask(row(i)+1,col(i)  ) == 1 && mask(row(i)-1,col(i)  ) == 1
+            dir{i} = {3;7;8};
+        end
+    end
+end
+
 
 
 %% Simulating using LBM
@@ -132,22 +214,23 @@ for t = 1:niter
     f(:,nx,8) = f(:,nx,6) + 0.5 * (f(:,nx,4) - f(:,nx,5)) ...
                 - 1/6 * rho_e * u_e - 1/2 * rho_e * v_e;
     
+    % Note implementing ny at 2 and ny-1 since 1 and ny are empty
     % Top Boundary ie u = 0 using Zou & He
-    rho_n = 1/(1-v_n) * (f(1,:,1) + f(1,:,2) + f(1,:,3) + ...
-                         2*(f(1,:,4) + f(1,:,6) + f(1,:,7)));
-    f(1,:,5) = f(1,:,4) - 2/3 * rho_n * u_n;
-    f(1,:,8) = f(1,:,6) + 0.5 * (f(1,:,2) - f(1,:,3)) ...
+    rho_n = 1/(1-v_n) * (f(2,:,1) + f(2,:,2) + f(2,:,3) + ...
+                         2*(f(2,:,4) + f(2,:,6) + f(2,:,7)));
+    f(2,:,5) = f(2,:,4) - 2/3 * rho_n * u_n;
+    f(2,:,8) = f(2,:,6) + 0.5 * (f(2,:,2) - f(2,:,3)) ...
                - 1/2 * rho_n * u_n - 1/6 * rho_n * v_n;
-    f(1,:,9) = f(1,:,7) - 0.5 * (f(1,:,2) - f(1,:,3)) ...
+    f(2,:,9) = f(2,:,7) - 0.5 * (f(2,:,2) - f(2,:,3)) ...
                + 1/2 * rho_n * u_n - 1/6 * rho_n * v_n;
     
     % Bottom Boundary ie u = 0 using Zou & He
-    rho_s = 1/(1-v_s) * (f(ny,:,1) + f(ny,:,2) + f(ny,:,3) + ...
-                         2*(f(ny,:,5) + f(ny,:,8) + f(ny,:,9)));
-    f(ny,:,4) = f(ny,:,5) + 2/3 * rho_s * u_s;
-    f(ny,:,6) = f(ny,:,8) - 0.5 * (f(ny,:,2) - f(ny,:,3)) ...
+    rho_s = 1/(1-v_s) * (f(ny-1,:,1) + f(ny-1,:,2) + f(ny-1,:,3) + ...
+                         2*(f(ny-1,:,5) + f(ny-1,:,8) + f(ny-1,:,9)));
+    f(ny-1,:,4) = f(ny-1,:,5) + 2/3 * rho_s * u_s;
+    f(ny-1,:,6) = f(ny-1,:,8) - 0.5 * (f(ny-1,:,2) - f(ny-1,:,3)) ...
                + 1/2 * rho_s * u_s + 1/6 * rho_s * v_s;
-    f(ny,:,7) = f(ny,:,9) + 0.5 * (f(ny,:,2) - f(ny,:,3)) ...
+    f(ny-1,:,7) = f(ny-1,:,9) + 0.5 * (f(ny-1,:,2) - f(ny-1,:,3)) ...
                - 1/2 * rho_s * u_s + 1/6 * rho_s * v_s;
     
 
@@ -199,6 +282,7 @@ for t = 1:niter
 
     % Boundary conditions for g
     % LHS Boundary T = T_h using Inamuro
+    % Flat boundary
     for i = 1:ny
         for j = 1
             for k = [2 6 9]
@@ -208,24 +292,56 @@ for t = 1:niter
             end
         end
     end
-    % RHS Boundary T = T_c using Inamuro
+    
+    % RHS domain Boundary T = T_c using Inamuro note u = 0 automatically
     for i = 1:ny
         for j = nx
             for k = [4 7 8]
-                % Tdash = (12/(2+3*uy(i))) .* (T_c - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
-                Tdash = (12/(2+3*uy(i))) .* (T_c*1.0141 - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
-                                            - g(i,j,5) - g(i,j,6) - g(i,j,9));
-                g(i,j,k) = w(k) * Tdash .* (1 + 3*uy(i));
+                Tdash = 6 * (T_c - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
+                                 - g(i,j,5) - g(i,j,6) - g(i,j,9));
+                g(i,j,k) = w(k) * Tdash;
             end
         end
     end
-    % Top Boundary ie partial C wrt y = 0
-    for i = 1:nx
-        g(ny,i,:) = g(ny-1,i,:);
+    % RHS finger curved Boundary T = T_c using Inamuro
+    for i = 1:length(col)
+        T_in = 0;
+        for j = 1:length(dir{i})
+            T_in = T_in + g(row(i),col(i),dir{i}{j});
+        end
+        T_tot = g(row(i),col(i), 1) + g(row(i),col(i), 2) + g(row(i),col(i), 3) ...
+              + g(row(i),col(i), 4) + g(row(i),col(i), 5) + g(row(i),col(i), 6) ...
+              + g(row(i),col(i), 7) + g(row(i),col(i), 8) + g(row(i),col(i), 9);
+        weight = 0;
+        for j = 1:length(dir{i})
+            weight = weight + w(dir{i}{j});
+        end
+        Tdash = (T_c - T_tot + T_in) / weight; % this temp doesn't work
+        for j = cell2mat(dir{i})
+            g(row(i),col(i),j) = w(j) * Tdash;
+        end
     end
-    % Bottom Boundary ie ie partial C wrt y = 0
-    for i = 1:nx
-        g(1,i,:) = g(1+1,i,:);
+
+    % Top Boundary T = T_c using Inamuro. Note zero velocity
+    for i = 2
+        for j = 2:a
+            for k = [5 8 9]
+                Tdash = 6 * (T_c - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
+                                 - g(i,j,4) - g(i,j,6) - g(i,j,7));
+                g(i,j,k) = w(k) * Tdash;
+            end
+        end
+    end
+
+    % Bottom Boundary T = T_c using Inamuro. Note zero velocity
+    for i = ny-1
+        for j = 2:nx
+            for k = [4 6 7]
+                Tdash = 6 * (T_c - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
+                                 - g(i,j,5) - g(i,j,8) - g(i,j,9));
+                g(i,j,k) = w(k) * Tdash;
+            end
+        end
     end
 
 
