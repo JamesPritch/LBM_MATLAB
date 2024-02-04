@@ -4,23 +4,19 @@
 % Scalars
 nx = 234;
 ny = 66;
-niter = 200;
+niter = 500;
 rho_0 = 1.0000005;
 T_0 = 0.55; % T<1 seems to work
 beta = 1e-7; % Check hand calculation of this 100
 a = 202; % Centre of curve at fingertip
+A = 1e-2;
+Delta_T = 4;
+R = 6;
 
 % Boundary condition parameters
 T_c = 0.45; 
 T_h = 0.55;
-u_w = 0;
-v_w = 0;
-u_e = 0;
-v_e = 0;
-u_n = 0;
-v_n = 0;
-u_s = 0;
-v_s = 0;
+u_finger = 0;
 
 % Vectors
 x = 1:nx;
@@ -47,11 +43,11 @@ tau_v = 1; % I don't know this, this is a guess, doesn't seem to make difference
 v = c^2 * (tau_v - 0.5);
 chi = (2/3) * c^2 * (tau_c - 0.5);
 
-% Initialisation of the temperature and velocity field at time t = 0
-T = zeros(ny, nx) + T_0;
-
-ux = zeros(ny, nx);
-uy = zeros(ny, nx);
+% Initialisation of fields at time t = 0
+T = zeros(ny, nx) + T_0; % Temperature
+ux = zeros(ny, nx); % Velocity in x direction
+uy = zeros(ny, nx); % Velocity in y direction
+omega = zeros(ny,nx); % Damage function
 
 % Force fields
 G = zeros(ny,nx,ndir);
@@ -81,12 +77,9 @@ for j = a+25:a+31
     end
 end
 
-
 % Directions for Inamuro on a curved b.c.
 dir = cell(length(row));
-dir{1} = {5;8;9}; % Setting first two values since algorithm "looks" at
-dir{2} = {4;6;7}; % nodes either side which wouldn't work for 1st nodes
-for i = 3:length(row)
+for i = 1:length(row)
     if row(i) <= 0.5 * ny
         if mask(row(i)  ,col(i)-1) == 1 && mask(row(i)  ,col(i)+1) == 1
             dir{i} = {5;8;9};
@@ -197,41 +190,41 @@ for t = 1:niter
 
     % Boundary conditions for f
     % LHS Boundary ie u = 0 using Zou & He
-    rho_w = 1/(1-u_w) * (f(:,1,1) + f(:,1,4) + f(:,1,5) + ...
+    rho_w = 1/(1-u_finger) * (f(:,1,1) + f(:,1,4) + f(:,1,5) + ...
                          2*(f(:,1,3) + f(:,1,7) + f(:,1,8)));
-    f(:,1,2) = f(:,1,3) + 2/3 * rho_w * u_w;
+    f(:,1,2) = f(:,1,3) + 2/3 * rho_w * u_finger;
     f(:,1,6) = f(:,1,8) - 0.5 * (f(:,1,4) - f(:,1,5)) ...
-               + 1/6 * rho_w * u_w + 1/2 * rho_w * v_w;
+               + 1/6 * rho_w * u_finger + 1/2 * rho_w * u_finger;
     f(:,1,9) = f(:,1,7) + 0.5 * (f(:,1,4) - f(:,1,5)) ...
-               + 1/6 * rho_w * u_w - 1/2 * rho_w * v_w;
+               + 1/6 * rho_w * u_finger - 1/2 * rho_w * u_finger;
 
     % RHS Boundary ie u = 0 using Zou & He
-    rho_e = 1/(1-u_e) * (f(:,nx,1) + f(:,nx,4) + f(:,nx,5) + ...
+    rho_e = 1/(1-u_finger) * (f(:,nx,1) + f(:,nx,4) + f(:,nx,5) + ...
                          2*(f(:,nx,2) + f(:,nx,6) + f(:,nx,9)));
-    f(:,nx,3) = f(:,nx,2) - 2/3 * rho_e * u_e;
+    f(:,nx,3) = f(:,nx,2) - 2/3 * rho_e * u_finger;
     f(:,nx,7) = f(:,nx,9) - 0.5 * (f(:,nx,4) - f(:,nx,5)) ...
-                - 1/6 * rho_e * u_e + 1/2 * rho_e * v_e;
+                - 1/6 * rho_e * u_finger + 1/2 * rho_e * u_finger;
     f(:,nx,8) = f(:,nx,6) + 0.5 * (f(:,nx,4) - f(:,nx,5)) ...
-                - 1/6 * rho_e * u_e - 1/2 * rho_e * v_e;
+                - 1/6 * rho_e * u_finger - 1/2 * rho_e * u_finger;
     
     % Note implementing ny at 2 and ny-1 since 1 and ny are empty
     % Top Boundary ie u = 0 using Zou & He
-    rho_n = 1/(1-v_n) * (f(2,:,1) + f(2,:,2) + f(2,:,3) + ...
+    rho_n = 1/(1-u_finger) * (f(2,:,1) + f(2,:,2) + f(2,:,3) + ...
                          2*(f(2,:,4) + f(2,:,6) + f(2,:,7)));
-    f(2,:,5) = f(2,:,4) - 2/3 * rho_n * u_n;
+    f(2,:,5) = f(2,:,4) - 2/3 * rho_n * u_finger;
     f(2,:,8) = f(2,:,6) + 0.5 * (f(2,:,2) - f(2,:,3)) ...
-               - 1/2 * rho_n * u_n - 1/6 * rho_n * v_n;
+               - 1/2 * rho_n * u_finger - 1/6 * rho_n * u_finger;
     f(2,:,9) = f(2,:,7) - 0.5 * (f(2,:,2) - f(2,:,3)) ...
-               + 1/2 * rho_n * u_n - 1/6 * rho_n * v_n;
+               + 1/2 * rho_n * u_finger - 1/6 * rho_n * u_finger;
     
     % Bottom Boundary ie u = 0 using Zou & He
-    rho_s = 1/(1-v_s) * (f(ny-1,:,1) + f(ny-1,:,2) + f(ny-1,:,3) + ...
+    rho_s = 1/(1-u_finger) * (f(ny-1,:,1) + f(ny-1,:,2) + f(ny-1,:,3) + ...
                          2*(f(ny-1,:,5) + f(ny-1,:,8) + f(ny-1,:,9)));
-    f(ny-1,:,4) = f(ny-1,:,5) + 2/3 * rho_s * u_s;
+    f(ny-1,:,4) = f(ny-1,:,5) + 2/3 * rho_s * u_finger;
     f(ny-1,:,6) = f(ny-1,:,8) - 0.5 * (f(ny-1,:,2) - f(ny-1,:,3)) ...
-               + 1/2 * rho_s * u_s + 1/6 * rho_s * v_s;
+               + 1/2 * rho_s * u_finger + 1/6 * rho_s * u_finger;
     f(ny-1,:,7) = f(ny-1,:,9) + 0.5 * (f(ny-1,:,2) - f(ny-1,:,3)) ...
-               - 1/2 * rho_s * u_s + 1/6 * rho_s * v_s;
+               - 1/2 * rho_s * u_finger + 1/6 * rho_s * u_finger;
     
 
     % Macroscopic variables from f
@@ -372,6 +365,10 @@ for t = 1:niter
     F(:,:,3) = (G(:,:,3).*(zeta_x(3) - ux - uy)./T) .* feq(:, :, 3);
 
 
+    % Tissue damage function update
+    omega = omega + A * exp( - Delta_T ./ (R * T));
+
+
     % Print progress
     if mod(t, 100) == 0
         fprintf('Iteration: %d, Time: %f \n', t, toc);
@@ -380,9 +377,13 @@ for t = 1:niter
 
 end
 
+% Necrotic tissue
+theta = 1 - exp( - omega);
+
 
 %% Saving T to file:
 save /Users/jpritch/Documents/MATLAB/model/T1 T
+save /Users/jpritch/Documents/MATLAB/model/omega omega
 
 
 

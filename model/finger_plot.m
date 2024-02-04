@@ -1,8 +1,10 @@
 %% Plotting of Benchamrk 1 with different grid sizes
-%% Read C_BGK from file
+%% Read variables from file
 load /Users/jpritch/Documents/MATLAB/model/T1
 T = T(2:65,:); % This removes the upper and lower rows which weren't
                % part of the actual model
+load /Users/jpritch/Documents/MATLAB/model/omega
+
 
 %% Setting Variables
 % Scalars
@@ -46,21 +48,17 @@ box on
 
 
 
-% Temperature cross section
-% T_plot = (T(32,1:nx)-T_c)/(T_h-T_c);
-% figure;
-% axes('FontSize',11.5, 'NextPlot', 'add');
-% plot(x/(ny-1),1-x/(2*(ny-1)),'k', ...
-%      x/(ny-1),T_plot,'ok', LineWidth=0.9);
-% xlabel('${x/N_x}$','interpreter','latex', fontsize=19)
-% ylabel('${\frac{T-T_c}{T_h-T_c}}$','interpreter','latex', fontsize=23)
-% axis equal
+% Necrosis plotting
+figure;
+axes('FontSize',11.5, 'NextPlot', 'add');
+pcolor(omega)
+xlabel('${x/N_y}$','interpreter','latex', fontsize=19)
+ylabel('${y/N_y}$','interpreter','latex', fontsize=19)
+axis equal
+colorbar
 % xlim([0 2])
 % ylim([-7e-4 1])
-% leg = legend({'Expected', 'Numerical'}, 'interpreter','latex', ...
-%     fontsize = 14);
-% leg.ItemTokenSize = [12,12,12];
-% box on
+box on
 
 
 
