@@ -4,7 +4,7 @@
 % Scalars
 nx = 250;
 ny = 66;
-niter = 500;
+niter = 2000;
 rho_0 = 1.0000005;
 T_0 = 0.55; % T<1 seems to work
 beta = 1e-7; % Check hand calculation of this 100
@@ -384,17 +384,24 @@ for t = 1:niter
     if mod(t, 100) == 0
         fprintf('Iteration: %d, Time: %f \n', t, toc);
     end
+    
+
+    % Save variables to file
+    % Necrotic tissue
+    theta = 1 - exp( - omega);
+    if mod(t, 100) == 0
+        T_name = sprintf('/Users/jpritch/Documents/MATLAB/model/saved/T%04d', t);
+        save(T_name, 'T');
+        theta_name = sprintf('/Users/jpritch/Documents/MATLAB/model/saved/theta%04d', t);
+        save(theta_name, 'theta');
+    end
 
 
 end
 
-% Necrotic tissue
-theta = 1 - exp( - omega);
 
 
-%% Saving T to file:
-save /Users/jpritch/Documents/MATLAB/model/T1 T
-save /Users/jpritch/Documents/MATLAB/model/omega omega
+
 
 
 
