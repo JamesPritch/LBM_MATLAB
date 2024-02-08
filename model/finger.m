@@ -2,7 +2,7 @@
 %% Setting Grid Independant Variables
 % Simulation parameters - input
 % Scalars
-nx = 234;
+nx = 250;
 ny = 66;
 niter = 500;
 rho_0 = 1.0000005;
@@ -10,7 +10,7 @@ T_0 = 0.55; % T<1 seems to work
 beta = 1e-7; % Check hand calculation of this 100
 a = 202; % Centre of curve at fingertip
 A = 1e-2;
-Delta_T = 4;
+Delta_E = 4;
 R = 6;
 
 % Boundary condition parameters
@@ -38,10 +38,11 @@ zeta_y = c*[0, 0, 0, 1, -1, 1, 1, -1, -1];
 w = [4/9, 1/9, 1/9, 1/9, 1/9, 1/36, 1/36, 1/36, 1/36];
 
 % Simulation parameters - built
-tau_c = 1.24;
 tau_v = 1; % I don't know this, this is a guess, doesn't seem to make difference
-v = c^2 * (tau_v - 0.5);
-chi = (2/3) * c^2 * (tau_c - 0.5);
+tau_c_bone = 1;
+tau_c_tissue = 0.6;
+% v = c^2 * (tau_v - 0.5);
+% chi = (2/3) * c^2 * (tau_c - 0.5);
 
 % Initialisation of fields at time t = 0
 T = zeros(ny, nx) + T_0; % Temperature
@@ -53,6 +54,7 @@ omega = zeros(ny,nx); % Damage function
 G = zeros(ny,nx,ndir);
 F = zeros(ny,nx,ndir);
 
+% Curved outlines
 % Finger outline
 mask = zeros(ny,nx);
 mask(   2,1:a+1) = 1;
@@ -63,12 +65,10 @@ for i = 1:ny
         r(i,j) = sqrt((x(j)-a)^2+(y(i)+0.5)^2);
     end
 end
-[row,col] = find(abs(r)>31 & xs >= a & abs(r)<31.9);
-for i = 1:length(row)
-    mask(row(i), col(i)) = 1;
+[row1,col1] = find(abs(r)>31 & xs >= a & abs(r)<31.9);
+for i = 1:length(row1)
+    mask(row1(i), col1(i)) = 1;
 end
-
-
 for j = a+25:a+31
     for i = 11:54
         if mask(i,j) == 1 && mask(i,j+1) == 1
@@ -76,53 +76,65 @@ for j = a+25:a+31
         end
     end
 end
+% Bone outline
+tau_c = zeros(ny,nx) + tau_c_tissue;
+[row2,col2] = find(xs >= a & abs(r)<17);
+for i = 1:length(row2)
+    tau_c(row2(i), col2(i)) = tau_c_bone;
+end
+tau_c(ny/4:3*ny/4,1:a) = tau_c_bone;
+% Initialising Temperature field outside finger
+[row3,col3] = find(abs(r)>31 & xs >= a);
+for i = 1:length(row3)
+    T(row3(i), col3(i)) = T_c;
+end
 
 % Directions for Inamuro on a curved b.c.
-dir = cell(length(row));
-for i = 1:length(row)
-    if row(i) <= 0.5 * ny
-        if mask(row(i)  ,col(i)-1) == 1 && mask(row(i)  ,col(i)+1) == 1
+dir = cell(length(row1));
+for i = 1:length(row1)
+    if row1(i) <= 0.5 * ny
+        if mask(row1(i)  ,col1(i)-1) == 1 && mask(row1(i)  ,col1(i)+1) == 1
             dir{i} = {5;8;9};
         end
-        if mask(row(i)  ,col(i)-1) == 1 && mask(row(i)+1,col(i)+1) == 1
+        if mask(row1(i)  ,col1(i)-1) == 1 && mask(row1(i)+1,col1(i)+1) == 1
             dir{i} = {5;8};
         end
-        if mask(row(i)-1,col(i)-1) == 1 && mask(row(i)+1,col(i)+1) == 1
+        if mask(row1(i)-1,col1(i)-1) == 1 && mask(row1(i)+1,col1(i)+1) == 1
             dir{i} = {3;5;8};
         end
-        if mask(row(i)-1,col(i)-1) == 1 && mask(row(i)  ,col(i)+1) == 1
+        if mask(row1(i)-1,col1(i)-1) == 1 && mask(row1(i)  ,col1(i)+1) == 1
             dir{i} = {3;5;8;9};
         end
-        if mask(row(i)-1,col(i)-1) == 1 && mask(row(i)+1,col(i)  ) == 1
+        if mask(row1(i)-1,col1(i)-1) == 1 && mask(row1(i)+1,col1(i)  ) == 1
             dir{i} = {3;8};
         end
-        if mask(row(i)-1,col(i)  ) == 1 && mask(row(i)+1,col(i)+1) == 1
+        if mask(row1(i)-1,col1(i)  ) == 1 && mask(row1(i)+1,col1(i)+1) == 1
             dir{i} = {3;5;7;8};
         end
-        if mask(row(i)-1,col(i)  ) == 1 && mask(row(i)+1,col(i)  ) == 1
+        if mask(row1(i)-1,col1(i)  ) == 1 && mask(row1(i)+1,col1(i)  ) == 1
             dir{i} = {3;7;8};
         end
     end
-    if row(i) > 0.5 * ny
-        if mask(row(i)  ,col(i)-1) == 1 && mask(row(i)  ,col(i)+1) == 1
+    if row1(i) > 0.5 * ny
+        if mask(row1(i)  ,col1(i)-1) == 1 && mask(row1(i)  ,col1(i)+1) == 1
             dir{i} = {4;6;7};
         end
-        if mask(row(i)+1,col(i)-1) == 1 && mask(row(i)  ,col(i)+1) == 1
+        if mask(row1(i)+1,col1(i)-1) == 1 && mask(row1(i)  ,col1(i)+1) == 1
             dir{i} = {3;4;6;7};
         end
-        if mask(row(i)  ,col(i)-1) == 1 && mask(row(i)-1,col(i)+1) == 1
+        if mask(row1(i)  ,col1(i)-1) == 1 && mask(row1(i)-1,col1(i)+1) == 1
             dir{i} = {4;7};
         end
-        if mask(row(i)+1,col(i)-1) == 1 && mask(row(i)-1,col(i)+1) == 1
+        if mask(row1(i)+1,col1(i)-1) == 1 && mask(row1(i)-1,col1(i)+1) == 1
             dir{i} = {3;4;7};
         end
-        if mask(row(i)+1,col(i)-1) == 1 && mask(row(i)-1,col(i)  ) == 1
+        if mask(row1(i)+1,col1(i)-1) == 1 && mask(row1(i)-1,col1(i)  ) == 1
             dir{i} = {3;7};
         end
-        if mask(row(i)+1,col(i)  ) == 1 && mask(row(i)-1,col(i)+1) == 1
+        if mask(row1(i)+1,col1(i)  ) == 1 && mask(row1(i)-1,col1(i)+1) == 1
             dir{i} = {3;4;7;8};
         end
-        if mask(row(i)+1,col(i)  ) == 1 && mask(row(i)-1,col(i)  ) == 1
+        if mask(row1(i)+1,col1(i)  ) == 1 && mask(row1(i)-1,col1(i)  ) == 1
             dir{i} = {3;7;8};
         end
     end
@@ -250,7 +262,7 @@ for t = 1:niter
 
     % LBM for fluid temperature g second
     % Collision
-    gcol = g - g * 1/tau_c + geq * 1/tau_c;
+    gcol = g - g * 1./tau_c + geq * 1./tau_c;
     
 
     % Streaming for g - Explicit version
@@ -275,7 +287,6 @@ for t = 1:niter
 
     % Boundary conditions for g
     % LHS Boundary T = T_h using Inamuro
-    % Flat boundary
     for i = 1:ny
         for j = 1
             for k = [2 6 9]
@@ -290,34 +301,34 @@ for t = 1:niter
     for i = 1:ny
         for j = nx
             for k = [4 7 8]
-                Tdash = 6 * (T_c - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
+                Tdash = (12/(2+3*uy(i))) .* (T_c - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
                                  - g(i,j,5) - g(i,j,6) - g(i,j,9));
                 g(i,j,k) = w(k) * Tdash;
             end
         end
     end
     % RHS finger curved Boundary T = T_c using Inamuro
-    for i = 1:length(col)
+    for i = 1:length(col1)
         T_in = 0;
         for j = 1:length(dir{i})
-            T_in = T_in + g(row(i),col(i),dir{i}{j});
+            T_in = T_in + g(row1(i),col1(i),dir{i}{j});
         end
-        T_tot = g(row(i),col(i), 1) + g(row(i),col(i), 2) + g(row(i),col(i), 3) ...
-              + g(row(i),col(i), 4) + g(row(i),col(i), 5) + g(row(i),col(i), 6) ...
-              + g(row(i),col(i), 7) + g(row(i),col(i), 8) + g(row(i),col(i), 9);
+        T_tot = g(row1(i),col1(i), 1) + g(row1(i),col1(i), 2) + g(row1(i),col1(i), 3) ...
+              + g(row1(i),col1(i), 4) + g(row1(i),col1(i), 5) + g(row1(i),col1(i), 6) ...
+              + g(row1(i),col1(i), 7) + g(row1(i),col1(i), 8) + g(row1(i),col1(i), 9);
         weight = 0;
         for j = 1:length(dir{i})
             weight = weight + w(dir{i}{j});
         end
         Tdash = (T_c - T_tot + T_in) / weight; % this temp doesn't work
         for j = cell2mat(dir{i})
-            g(row(i),col(i),j) = w(j) * Tdash;
+            g(row1(i),col1(i),j) = w(j) * Tdash;
         end
     end
 
     % Top Boundary T = T_c using Inamuro. Note zero velocity
     for i = 2
-        for j = 2:a
+        for j = 2:nx
             for k = [5 8 9]
                 Tdash = 6 * (T_c - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
                                  - g(i,j,4) - g(i,j,6) - g(i,j,7));
@@ -366,7 +377,7 @@ for t = 1:niter
 
 
     % Tissue damage function update
-    omega = omega + A * exp( - Delta_T ./ (R * T));
+    omega = omega + A * exp( - Delta_E ./ (R * T));
 
 
     % Print progress
