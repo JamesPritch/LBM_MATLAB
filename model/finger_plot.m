@@ -50,34 +50,34 @@ end
 
 %% Plotting T
 % Initial setup
-figure;
-axes('FontSize',11.5, 'NextPlot', 'add');
-% Plotting finger outline
-plot(zeros(ny),((0:ny-1) - (ny-1)/2)/(ny-1), 'k', LineWidth=1);
-plot((0:a)/(ny-1),(zeros(a+1) - 0.5), 'k', LineWidth=1);
-plot((0:a)/(ny-1),zeros(a+1) + 0.5, 'k', LineWidth=1);
-th = linspace( pi/2, -pi/2, 100);
-R = 1/2;
-x_c = R*cos(th) + (a)/(ny-1);
-y_c = R*sin(th) + 0;
-plot(x_c,y_c, 'k', LineWidth=1);
-% Plotting bone outline
-plot((0:a)/(ny-1),zeros(a+1) - 0.25, 'k', LineWidth=0.7);
-plot((0:a)/(ny-1),zeros(a+1) + 0.25, 'k', LineWidth=0.7);
-R = 1/4;
-x_c = R*cos(th) + (a)/(ny-1);
-y_c = R*sin(th) + 0;
-plot(x_c,y_c, 'k', LineWidth=0.7);
-% Making plot look nice
-xlabel('${x/N_y}$','interpreter','latex', fontsize=19)
-ylabel('${y/N_y}$','interpreter','latex', fontsize=19)
-axis equal
-xlim([-0.2*scale 3.85*scale])
-ylim([-0.7*scale 0.7*scale])
+% figure;
+% axes('FontSize',11.5, 'NextPlot', 'add');
+% % Plotting finger outline
+% plot(zeros(ny),((0:ny-1) - (ny-1)/2)/(ny-1), 'k', LineWidth=1);
+% plot((0:a)/(ny-1),(zeros(a+1) - 0.5), 'k', LineWidth=1);
+% plot((0:a)/(ny-1),zeros(a+1) + 0.5, 'k', LineWidth=1);
+% th = linspace( pi/2, -pi/2, 100);
+% R = 1/2;
+% x_c = R*cos(th) + (a)/(ny-1);
+% y_c = R*sin(th) + 0;
+% plot(x_c,y_c, 'k', LineWidth=1);
+% % Plotting bone outline
+% plot((0:a)/(ny-1),zeros(a+1) - 0.25, 'k', LineWidth=0.7);
+% plot((0:a)/(ny-1),zeros(a+1) + 0.25, 'k', LineWidth=0.7);
+% R = 1/4;
+% x_c = R*cos(th) + (a)/(ny-1);
+% y_c = R*sin(th) + 0;
+% plot(x_c,y_c, 'k', LineWidth=0.7);
+% % Making plot look nice
+% xlabel('${x/N_y}$','interpreter','latex', fontsize=19)
+% ylabel('${y/N_y}$','interpreter','latex', fontsize=19)
+% axis equal
+% xlim([-0.2*scale 3.85*scale])
+% ylim([-0.7*scale 0.7*scale])
 
 % Temperature heatmap
 figure;
-axes('FontSize',11.5, 'NextPlot', 'add');
+axes('FontSize',18, 'NextPlot', 'add');
 % Plotting temperature of finger
 s = pcolor(scale*x/(ny-1),scale*y/(ny-1),T);
 set(s, 'EdgeColor', 'none');
@@ -98,8 +98,8 @@ x_c = R*cos(th) + (a)/(ny-1);
 y_c = R*sin(th) + 0;
 plot(x_c,y_c, 'k', LineWidth=0.7);
 % Making plot look nice
-xlabel('${x/N_y}$','interpreter','latex', fontsize=19)
-ylabel('${y/N_y}$','interpreter','latex', fontsize=19)
+xlabel('${x/N_y}$','interpreter','latex', fontsize=25)
+ylabel('${y/N_y}$','interpreter','latex', fontsize=25)
 axis equal
 xlim([-0.2*scale 3.85*scale])
 ylim([-0.7*scale 0.7*scale])
@@ -109,7 +109,7 @@ box on
 
 % Temperature contour
 figure;
-axes('FontSize',11.5, 'NextPlot', 'add');
+axes('FontSize',18, 'NextPlot', 'add');
 % Plotting temperature of finger
 contour(scale*x/(ny-1),scale*y/(ny-1),T, 0.45:0.005:0.55, ...
                 LineWidth=0.9);
@@ -130,8 +130,8 @@ x_c = R*cos(th) + (a)/(ny-1);
 y_c = R*sin(th) + 0;
 plot(x_c,y_c, 'k', LineWidth=0.7);
 % Making plot look nice
-xlabel('${x/N_y}$','interpreter','latex', fontsize=19)
-ylabel('${y/N_y}$','interpreter','latex', fontsize=19)
+xlabel('${x/N_y}$','interpreter','latex', fontsize=25)
+ylabel('${y/N_y}$','interpreter','latex', fontsize=25)
 axis equal
 xlim([-0.2*scale 3.85*scale])
 ylim([-0.7*scale 0.7*scale])
