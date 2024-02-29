@@ -1,20 +1,20 @@
 %% Plotting of Benchamrk 1 with different grid sizes
 %% Read variables from file
-load /Users/jpritch/Documents/MATLAB/model/66x250/saved/T0100
-T = T(2:65,1:234); % This removes the upper and lower rows which weren't
-                   % part of the actual model
-load /Users/jpritch/Documents/MATLAB/model/66x250/saved/theta0100
-theta = theta(2:65,1:234);
+load /Users/jpritch/Documents/MATLAB/model/130x500/saved/T0100
+T = T(2:129,1:468); % This removes the upper and lower rows which weren't
+                    % part of the actual model
+load /Users/jpritch/Documents/MATLAB/model/130x500/saved/theta0100
+theta = theta(2:129,1:468);
 
 
 %% Setting Variables
 % Scalars
-nx = 234;
-ny = 64;
+nx = 468;
+ny = 128;
 scale = 1; % 18 is closest to mm in paper
-a = 202; % Centre of curve at fingertip
-T_c = 0.45; 
-T_h = 0.55;
+a = 404; % Centre of curve at fingertip
+T_c = 0.486; 
+T_h = 0.598;
 
 % Vectors
 x = 0:nx-1;
@@ -36,12 +36,12 @@ for i = 1:ny
         r(i,j) = sqrt((x(j)-a)^2+(y(i)+0.5)^2);
     end
 end
-[row1,col1] = find(abs(r)>31.5*ny/64 & xs >= a & ys >= 0);
+[row1,col1] = find(abs(r)>(32*ny/64 - 0.5) & xs >= a & ys >= 0);
 for i = 1:length(row1)
     T(row1(i), col1(i)) = NaN;
     theta(row1(i), col1(i)) = NaN;
 end
-[row2,col2] = find(abs(r)>31.5*ny/64 & xs >= a & ys <= 0);
+[row2,col2] = find(abs(r)>(32*ny/64 - 0.5) & xs >= a & ys <= 0);
 for i = 1:length(row2)
     T(row2(i), col2(i)) = NaN;
     theta(row2(i), col2(i)) = NaN;
@@ -111,7 +111,7 @@ box on
 figure;
 axes('FontSize',18, 'NextPlot', 'add');
 % Plotting temperature of finger
-contour(scale*x/(ny-1),scale*y/(ny-1),T, 0.45:0.005:0.55, ...
+contour(scale*x/(ny-1),scale*y/(ny-1),T, 0.48:0.005:0.6, ...
                 LineWidth=0.9);
 % Plotting finger outline
 plot(zeros(ny),((0:ny-1) - (ny-1)/2)/(ny-1), 'k', LineWidth=1);
