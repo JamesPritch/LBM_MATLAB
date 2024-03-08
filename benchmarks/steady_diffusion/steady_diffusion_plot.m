@@ -1,12 +1,12 @@
 %% Plotting of Benchamrk 1 with different grid sizes
 %% Read variables from file
 load /Users/jpritch/Documents/MATLAB/benchmarks/steady_diffusion
-T_numerical = T;
+T_numerical = T(5:24,:);
 
 %% Setting Variables
 % Scalars
-nx = 100;
-ny = 100;
+nx = 20;
+ny = 20;
 T_c = 0.45; 
 T_h = 0.55;
 A = 4;
@@ -58,10 +58,10 @@ axes('FontSize',18, 'NextPlot', 'add');
 plot(x, T_exact(:,10), 'k', LineWidth=1)
 plot(x, T_numerical(:,10), 'ko', LineWidth=1)
 % title("Concentration profile 1a", FontSize=20)
-xlabel('${x/\Delta x}$','interpreter','latex', fontsize=30) 
-ylabel('${C/C_0}$','interpreter','latex', fontsize=30)
-xlim([0 1])
-ylim([0 1])
+xlabel('${y/\Delta y}$','interpreter','latex', fontsize=30) 
+ylabel('${\frac{T-T_0}{T_h-T_c}}$','interpreter','latex', fontsize=30)
+% xlim([0 1])
+% ylim([0 1])
 leg = legend('Analytical', 'Numerical', 'interpreter','latex', Location = 'northwest', fontsize = 22);
 leg.ItemTokenSize = [25,25,25];
 box on

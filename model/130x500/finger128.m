@@ -5,21 +5,22 @@
 nx = 500;
 ny = 130;
 ny_s = 128; % simulation ny
-niter = 100;
+niter = 1000;
 rho_0 = 1; % Think this is standard
 T_0 = 0.5; % T<1 seems to work
 beta = 1e-7; % Check hand calculation of this 100
 a = 404; % Centre of curve at fingertip
-A = 1e-2;
-Delta_E = 4;
-R = 6;
+% A = 1e-2;
+% Delta_E = 4;
+% R = 6;
 L_finger = round(1e-3/(1.78e-2/ny));
 
 % Boundary condition parameters
 T_c = 0.486; 
 T_h = 0.598;
 u_finger = 0;
-u_blood = 0.01;
+ux_blood = 0;
+uy_blood = 0.01;
 
 % Vectors
 x = 1:nx;
@@ -43,7 +44,7 @@ w = [4/9, 1/9, 1/9, 1/9, 1/9, 1/36, 1/36, 1/36, 1/36];
 % Simulation parameters - built
 tau_v = 1; % I don't know this, this is a guess, doesn't seem to make difference
 tau_c_bone = 1;
-tau_c_tissue = 0.6;
+tau_c_tissue = 0.8;
 % v = c^2 * (tau_v - 0.5);
 % chi = (2/3) * c^2 * (tau_c - 0.5);
 
@@ -214,13 +215,21 @@ for t = 1:niter
                + 1/6 * rho_w * u_finger - 1/2 * rho_w * u_finger;
 
     % RHS Boundary ie u = 0 using Zou & He (not actually finger)
-    rho_e = 1/(1-u_finger) * (f(:,nx,1) + f(:,nx,4) + f(:,nx,5) + ...
-                         2*(f(:,nx,2) + f(:,nx,6) + f(:,nx,9)));
-    f(:,nx,3) = f(:,nx,2) - 2/3 * rho_e * u_finger;
-    f(:,nx,7) = f(:,nx,9) - 0.5 * (f(:,nx,4) - f(:,nx,5)) ...
-                - 1/6 * rho_e * u_finger + 1/2 * rho_e * u_finger;
-    f(:,nx,8) = f(:,nx,6) + 0.5 * (f(:,nx,4) - f(:,nx,5)) ...
-                - 1/6 * rho_e * u_finger - 1/2 * rho_e * u_finger;
+    % rho_e = 1/(1-u_finger) * (f(:,nx,1) + f(:,nx,4) + f(:,nx,5) + ...
+    %                      2*(f(:,nx,2) + f(:,nx,6) + f(:,nx,9)));
+    % f(:,nx,3) = f(:,nx,2) - 2/3 * rho_e * u_finger;
+    % f(:,nx,7) = f(:,nx,9) - 0.5 * (f(:,nx,4) - f(:,nx,5)) ...
+    %             - 1/6 * rho_e * u_finger + 1/2 * rho_e * u_finger;
+    % f(:,nx,8) = f(:,nx,6) + 0.5 * (f(:,nx,4) - f(:,nx,5)) ...
+    %             - 1/6 * rho_e * u_finger - 1/2 * rho_e * u_finger;
+
+    % Tip of finger u = 0 using bounceback
+    opp = [0 2 1 4 3 7 8 5 6];
+    for i = 1:length(row1)
+        for k = 1:ndir
+            f(row1(i),col1(i),opp(k)+1) = fcol(row1(i),col1(i),k);
+        end
+    end
     
     % Note implementing ny at 2 and ny-1 since 1 and ny are empty
     % Top Boundary of finger ie u = 0 using Zou & He
@@ -245,13 +254,32 @@ for t = 1:niter
     % LHS Boundary of blood is u = 0.1 using Zou & He
     for i = [(round(3*ny/4) + 1):(round(3*ny/4) + L_finger - 1) ...
              (round(ny/4) - L_finger + 1):(round(ny/4) - 1)]
-        rho_w = 1/(1-u_blood) * (f(i,1,1) + f(i,1,4) + f(i,1,5) + ...
+        rho_w = 1/(1-ux_blood) * (f(i,1,1) + f(i,1,4) + f(i,1,5) + ...
                              2*(f(i,1,3) + f(i,1,7) + f(i,1,8)));
-        f(i,1,2) = f(i,1,3) + 2/3 * rho_w * u_blood;
+        f(i,1,2) = f(i,1,3) + 2/3 * rho_w * ux_blood;
         f(i,1,6) = f(i,1,8) - 0.5 * (f(i,1,4) - f(i,1,5)) ...
-                   + 1/6 * rho_w * u_blood + 1/2 * rho_w * u_blood;
+                   + 1/6 * rho_w * ux_blood + 1/2 * rho_w * uy_blood;
         f(i,1,9) = f(i,1,7) + 0.5 * (f(i,1,4) - f(i,1,5)) ...
-                   + 1/6 * rho_w * u_blood - 1/2 * rho_w * u_blood;
+                   + 1/6 * rho_w * ux_blood - 1/2 * rho_w * uy_blood;
+    end
+
+    % Top blood vessel walls are u = 0 using bounceback
+    opp = [0 2 1 4 3 7 8 5 6];
+    for i = [3*ny_s/4 3*ny_s/4 + L_finger]
+        for j = 1:a
+            for k = 1:ndir
+                f(i,j,opp(k)+1) = fcol(i,j,k);
+            end
+        end
+    end
+
+    % Bottom blood vessel walls are u = 0 using bounceback
+    for i = [ny_s/4 ny_s/4 + L_finger]
+        for j = 1:a
+            for k = 1:ndir
+                f(i,j,opp(k)+1) = fcol(i,j,k);
+            end
+        end
     end
 
 
@@ -393,7 +421,7 @@ for t = 1:niter
 
 
     % Tissue damage function update
-    omega = omega + A * exp( - Delta_E ./ (R * T));
+    % omega = omega + A * exp( - Delta_E ./ (R * T));
 
 
     % Print progress
@@ -404,12 +432,12 @@ for t = 1:niter
 
     % Save variables to file
     % Necrotic tissue
-    theta = 1 - exp( - omega);
+    % theta = 1 - exp( - omega);
     if mod(t, 100) == 0
         T_name = sprintf('/Users/jpritch/Documents/MATLAB/model/130x500/saved/T%04d', t);
         save(T_name, 'T');
-        theta_name = sprintf('/Users/jpritch/Documents/MATLAB/model/130x500/saved/theta%04d', t);
-        save(theta_name, 'theta');
+        % theta_name = sprintf('/Users/jpritch/Documents/MATLAB/model/130x500/saved/theta%04d', t);
+        % save(theta_name, 'theta');
     end
 
 

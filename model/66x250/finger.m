@@ -40,7 +40,7 @@ w = [4/9, 1/9, 1/9, 1/9, 1/9, 1/36, 1/36, 1/36, 1/36];
 % Simulation parameters - built
 tau_v = 1; % I don't know this, this is a guess, doesn't seem to make difference
 tau_c_bone = 1;
-tau_c_tissue = 0.6;
+tau_c_tissue = 0.9;
 % v = c^2 * (tau_v - 0.5);
 % chi = (2/3) * c^2 * (tau_c - 0.5);
 
@@ -82,7 +82,7 @@ tau_c = zeros(ny,nx) + tau_c_tissue;
 for i = 1:length(row2)
     tau_c(row2(i), col2(i)) = tau_c_bone;
 end
-tau_c(ny/4:3*ny/4,1:a) = tau_c_bone;
+tau_c(round(ny/4):round(3*ny/4),1:a) = tau_c_bone;
 % Initialising Temperature field outside finger
 [row3,col3] = find(abs(r)>31 & xs >= a);
 for i = 1:length(row3)

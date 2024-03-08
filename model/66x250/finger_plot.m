@@ -1,9 +1,9 @@
 %% Plotting of Benchamrk 1 with different grid sizes
 %% Read variables from file
-load /Users/jpritch/Documents/MATLAB/model/66x250/saved/T0100
+load /Users/jpritch/Documents/MATLAB/model/66x250/saved/T0800
 T = T(2:65,1:234); % This removes the upper and lower rows which weren't
                    % part of the actual model
-load /Users/jpritch/Documents/MATLAB/model/66x250/saved/theta0100
+load /Users/jpritch/Documents/MATLAB/model/66x250/saved/theta1000
 theta = theta(2:65,1:234);
 
 
