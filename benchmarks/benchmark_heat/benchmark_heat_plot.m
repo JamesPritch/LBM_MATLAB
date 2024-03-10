@@ -12,13 +12,13 @@ T_c = 0.45; % Set to non-dim and find proper non-dim later
 T_h = 0.55;
 
 % Vectors
-% x = 0:nx-2;
-% y = 0:ny-2;
-x = 0:nx-1;
-y = 0:ny-1;
+x = 0:nx-2;
+y = 0:ny-2;
+% x = 0:nx-1;
+% y = 0:ny-1;
 
 % Finding L_2 error (only works for x = 0:nx-1)
-Error = norm((T(32,1:nx)-T_c)/(T_h-T_c) - (1-x/(ny-1)), 'fro')/norm(x/(ny-1), 'fro');
+Error = norm((T(32,1:nx-1)-T_c)/(T_h-T_c) - (1-x/(ny-2)), 'fro')/norm(x/(ny-1), 'fro');
 
 
 %% Plotting T

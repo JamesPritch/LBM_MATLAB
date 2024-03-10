@@ -2,10 +2,10 @@
 %% Setting Grid Independant Variables
 % Simulation parameters - input
 % Scalars
-nx = 20;
-ny = 30;
-gap = 5;
-niter = 100;
+nx = 60;
+ny = 70;
+gap = 5; % must have nx + 2*gap = ny
+niter = 500;
 rho_0 = 1; % Think this is standard
 T_0 = 0.5; % T<1 seems to work
 beta = 1e-7; % Check hand calculation of this 100
@@ -15,7 +15,7 @@ R = 1; % Stability to ± 1e-3
 T_c = 0.45; 
 T_h = 0.55;
 ux_flow = 0;
-uy_flow = 0.01;
+uy_flow = 0.01; % I think 0.04 in paper, but doesn't like being that high
 
 % Matrices
 rho = zeros(ny,nx) + rho_0; % Density
@@ -34,7 +34,7 @@ tau_c = 1.1; % affects slope but not start or end points
 % Initialisation of fields at time t = 0
 T = zeros(ny, nx) + T_0; % Temperature
 T(gap,:) = T_c;
-T(nx-gap,:) = T_h;
+T(ny-gap-1,:) = T_h;
 ux = zeros(ny, nx); % Velocity in x direction
 uy = zeros(ny, nx) + uy_flow; % Velocity in y direction
 c = zeros(ny,nx) + c_0; % Lattice speed
@@ -111,16 +111,17 @@ for t = 1:niter
 
 
     % Boundary conditions for f
-    % Top Boundary of finger ie u = 0.1 using Zou & He
-    rho_n = 1/(1-uy_flow) * (f(25,:,1) + f(25,:,2) + f(25,:,3) + ...
-                          2*(f(25,:,4) + f(25,:,6) + f(25,:,7)));
-    f(25,:,5) = f(25,:,4) - 2/3 * rho_n * uy_flow;
-    f(25,:,8) = f(25,:,6) + 0.5 * (f(25,:,2) - f(25,:,3)) ...
+    % Top Boundary of finger ie uy = 0.01, ux = 0 using Zou & He
+    bc = ny - gap - 1;
+    rho_n = 1/(1+uy_flow) * (f(bc,:,1) + f(bc,:,2) + f(bc,:,3) + ...
+                          2*(f(bc,:,4) + f(bc,:,6) + f(bc,:,7)));
+    f(bc,:,5) = f(bc,:,4) - 2/3 * rho_n * uy_flow;
+    f(bc,:,8) = f(bc,:,6) + 0.5 * (f(bc,:,2) - f(bc,:,3)) ...
                - 1/2 * rho_n * ux_flow - 1/6 * rho_n * uy_flow;
-    f(25,:,9) = f(25,:,7) - 0.5 * (f(25,:,2) - f(25,:,3)) ...
+    f(bc,:,9) = f(bc,:,7) - 0.5 * (f(bc,:,2) - f(bc,:,3)) ...
                + 1/2 * rho_n * ux_flow - 1/6 * rho_n * uy_flow;
     
-    % Bottom Boundary of finger ie uy = 0.04, ux = 0 using Zou & He
+    % Bottom Boundary of finger ie uy = 0.01, ux = 0 using Zou & He
     bc = gap; % Decreases T at this node, best at gap, ny-gap
     rho_s = 1/(1-uy_flow) * (f(bc,:,1) + f(bc,:,2) + f(bc,:,3) + ...
                           2*(f(bc,:,5) + f(bc,:,8) + f(bc,:,9)));
@@ -192,7 +193,7 @@ for t = 1:niter
     end
 
     % Bottom Boundary T = T_h using Inamuro. Note zero velocity
-    for i = ny - gap
+    for i = ny - gap - 1
         for j = 1:nx
             for k = [4 6 7]
                 Tdash = (12/(2+3*uy(i,j))) .* (T_h - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
@@ -249,6 +250,7 @@ end
 
 
 % Save variables to file
+T = T(gap:nx+gap-1,:); % Removing the gap either side of the square domain
 save('/Users/jpritch/Documents/MATLAB/benchmarks/steady_diffusion', 'T');
 
 % Plotting fluid flow

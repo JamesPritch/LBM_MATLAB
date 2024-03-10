@@ -27,6 +27,19 @@ end
 
 
 %% Plotting C contours
+% Plotting setup
+% figure;
+% axes('FontSize',11.5, 'NextPlot', 'add');
+% plot([0 3],[0 0],'k', LineWidth=1);
+% plot([0 3],[1 1],'k:', LineWidth=1);
+% plot([0 0],[0 1],'k:', LineWidth=1);
+% plot([3 3],[0 1],'k:', LineWidth=1);
+% axis equal
+% xlim([0 3])
+% ylim([0 1])
+% box off
+% axis off
+
 % Plotting C_exact and C_BGK Concentration contours 
 figure;
 axes('FontSize',11.5, 'NextPlot', 'add');

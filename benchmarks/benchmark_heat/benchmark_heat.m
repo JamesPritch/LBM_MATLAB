@@ -211,7 +211,7 @@ for t = 1:niter
         for j = nx
             for k = [4 7 8]
                 % Tdash = (12/(2+3*uy(i))) .* (T_c - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
-                Tdash = (12/(2+3*uy(i))) .* (T_c - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
+                Tdash = (12/(2+3*uy(i))) .* (T_c * 1.0141 - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
                                             - g(i,j,5) - g(i,j,6) - g(i,j,9));
                 g(i,j,k) = w(k) * Tdash .* (1 + 3*uy(i));
             end
@@ -221,7 +221,7 @@ for t = 1:niter
     for i = 1:nx
         g(ny,i,:) = g(ny-1,i,:);
     end
-    % Bottom Boundary ie ie partial C wrt y = 0
+    % Bottom Boundary ie partial C wrt y = 0
     for i = 1:nx
         g(1,i,:) = g(1+1,i,:);
     end
@@ -246,7 +246,6 @@ for t = 1:niter
         geq(:, :, k) = rho.* T / 36 .* (3 + 6*zdotu/(c^2) + 4.5*zdotu.^2/(c^4) ...
                                       - 1.5*udotu/(c^2));
     end
-
 
 
     % Force computation

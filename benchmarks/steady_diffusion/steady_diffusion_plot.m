@@ -1,12 +1,12 @@
 %% Plotting of Benchamrk 1 with different grid sizes
 %% Read variables from file
 load /Users/jpritch/Documents/MATLAB/benchmarks/steady_diffusion
-T_numerical = T(5:24,:);
+T_numerical = T;
 
 %% Setting Variables
 % Scalars
-nx = 20;
-ny = 20;
+nx = 60;
+ny = 60;
 T_c = 0.45; 
 T_h = 0.55;
 A = 4;
