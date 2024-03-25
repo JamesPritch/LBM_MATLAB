@@ -25,6 +25,9 @@ for i = 1:ny
     end
 end
 
+% Error in C
+Error = norm(C_BGK - C_exact, 'fro')/norm(C_exact, 'fro');
+
 
 %% Plotting C contours
 % Plotting setup
@@ -42,18 +45,18 @@ end
 
 % Plotting C_exact and C_BGK Concentration contours 
 figure;
-axes('FontSize',11.5, 'NextPlot', 'add');
+axes('FontSize',13, 'NextPlot', 'add');
 plot(1:2,1:2,'k');
 plot(1:2,1:2,'k--');
 contour(x/ny,y/ny,C_exact, [0.2 0.4 0.6 0.8], 'k', LineWidth=0.9)
 [C,h] = contour(x/ny,y/ny,C_BGK, [0.2 0.4 0.6 0.8], 'k--', LineWidth=0.9);
-clabel(C,h,'manual', 'FontSize',12, 'LabelSpacing',502, 'Rotation',0)
-xlabel('${x/N_y}$','interpreter','latex', fontsize=19)
-ylabel('${y/N_y}$','interpreter','latex', fontsize=19)
+clabel(C,h,'manual', 'FontSize',14, 'LabelSpacing',502, 'Rotation',0)
+xlabel('${x/N_y}$','interpreter','latex', fontsize=22)
+ylabel('${y/N_y}$','interpreter','latex', fontsize=22)
 xlim([0 10])
 ylim([0 1])
 leg = legend({'Analytical', 'Numerical', '', ''}, 'interpreter','latex', ...
-    fontsize = 14);
+    fontsize = 16);
 leg.ItemTokenSize = [25,25,25];
 box on
 

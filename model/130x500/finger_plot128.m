@@ -1,6 +1,6 @@
 %% Plotting of Benchamrk 1 with different grid sizes
 %% Read variables from file
-load /Users/jpritch/Documents/MATLAB/model/130x500/saved/T1000
+load /Users/jpritch/Documents/MATLAB/model/130x500/saved/T5000
 T = T(2:129,1:468); % This removes the upper and lower rows which weren't
                     % part of the actual model
 load /Users/jpritch/Documents/MATLAB/model/130x500/saved/theta1000
@@ -11,10 +11,10 @@ theta = theta(2:129,1:468);
 % Scalars
 nx = 468;
 ny = 128;
-scale = 1; % 18 is closest to mm in paper
+scale = 0.018; % 18 is closest to mm in paper
 a = 404; % Centre of curve at fingertip
-T_c = 0.486; 
-T_h = 0.598;
+T_c = -30; 
+T_h = 25;
 
 % Vectors
 x = 0:nx-1;
@@ -47,6 +47,7 @@ for i = 1:length(row2)
     theta(row2(i), col2(i)) = NaN;
 end
 
+T = 500 * T - 273;
 
 %% Plotting T
 % Initial setup
@@ -82,21 +83,21 @@ axes('FontSize',18, 'NextPlot', 'add');
 s = pcolor(scale*x/(ny-1),scale*y/(ny-1),T);
 set(s, 'EdgeColor', 'none');
 % Plotting finger outline
-plot(zeros(ny),((0:ny-1) - (ny-1)/2)/(ny-1), 'k', LineWidth=1);
-plot((0:a)/(ny-1),(zeros(a+1) - 0.5), 'k', LineWidth=1);
-plot((0:a)/(ny-1),zeros(a+1) + 0.5, 'k', LineWidth=1);
+plot(zeros(ny),scale*((0:ny-1) - (ny-1)/2)/(ny-1), 'k', LineWidth=1);
+plot(scale*(0:a)/(ny-1),scale*(zeros(a+1) - 0.5), 'k', LineWidth=1);
+plot(scale*(0:a)/(ny-1),scale*(zeros(a+1) + 0.5), 'k', LineWidth=1);
 th = linspace( pi/2, -pi/2, 100);
 R = 1/2;
 x_c = R*cos(th) + (a)/(ny-1);
 y_c = R*sin(th) + 0;
-plot(x_c,y_c, 'k', LineWidth=1);
+plot(scale*x_c,scale*y_c, 'k', LineWidth=1);
 % Plotting bone outline
-plot((0:a)/(ny-1),zeros(a+1) - 0.25, 'k', LineWidth=0.7);
-plot((0:a)/(ny-1),zeros(a+1) + 0.25, 'k', LineWidth=0.7);
+plot(scale*(0:a)/(ny-1),scale*(zeros(a+1) - 0.25), 'k', LineWidth=0.7);
+plot(scale*(0:a)/(ny-1),scale*(zeros(a+1) + 0.25), 'k', LineWidth=0.7);
 R = 1/4;
 x_c = R*cos(th) + (a)/(ny-1);
 y_c = R*sin(th) + 0;
-plot(x_c,y_c, 'k', LineWidth=0.7);
+plot(scale*x_c,scale*y_c, 'k', LineWidth=0.7);
 % Making plot look nice
 xlabel('${x/N_y}$','interpreter','latex', fontsize=25)
 ylabel('${y/N_y}$','interpreter','latex', fontsize=25)
@@ -111,24 +112,24 @@ box on
 figure;
 axes('FontSize',18, 'NextPlot', 'add');
 % Plotting temperature of finger
-contour(scale*x/(ny-1),scale*y/(ny-1),T, 0.48:0.005:0.6, ...
+contour(scale*x/(ny-1),scale*y/(ny-1),T, T_c:1:T_h, ...
                 LineWidth=0.9);
 % Plotting finger outline
-plot(zeros(ny),((0:ny-1) - (ny-1)/2)/(ny-1), 'k', LineWidth=1);
-plot((0:a)/(ny-1),(zeros(a+1) - 0.5), 'k', LineWidth=1);
-plot((0:a)/(ny-1),zeros(a+1) + 0.5, 'k', LineWidth=1);
+plot(zeros(ny),scale*((0:ny-1) - (ny-1)/2)/(ny-1), 'k', LineWidth=1);
+plot(scale*(0:a)/(ny-1),scale*(zeros(a+1) - 0.5), 'k', LineWidth=1);
+plot(scale*(0:a)/(ny-1),scale*(zeros(a+1) + 0.5), 'k', LineWidth=1);
 th = linspace( pi/2, -pi/2, 100);
 R = 1/2;
 x_c = R*cos(th) + (a)/(ny-1);
 y_c = R*sin(th) + 0;
-plot(x_c,y_c, 'k', LineWidth=1);
+plot(scale*x_c,scale*y_c, 'k', LineWidth=1);
 % Plotting bone outline
-plot((0:a)/(ny-1),zeros(a+1) - 0.25, 'k', LineWidth=0.7);
-plot((0:a)/(ny-1),zeros(a+1) + 0.25, 'k', LineWidth=0.7);
+plot(scale*(0:a)/(ny-1),scale*(zeros(a+1) - 0.25), 'k', LineWidth=0.7);
+plot(scale*(0:a)/(ny-1),scale*(zeros(a+1) + 0.25), 'k', LineWidth=0.7);
 R = 1/4;
 x_c = R*cos(th) + (a)/(ny-1);
 y_c = R*sin(th) + 0;
-plot(x_c,y_c, 'k', LineWidth=0.7);
+plot(scale*x_c,scale*y_c, 'k', LineWidth=0.7);
 % Making plot look nice
 xlabel('${x/N_y}$','interpreter','latex', fontsize=25)
 ylabel('${y/N_y}$','interpreter','latex', fontsize=25)

@@ -5,22 +5,22 @@
 nx = 500;
 ny = 130;
 ny_s = 128; % simulation ny
-niter = 1000;
+niter = 5000;
 rho_0 = 1; % Think this is standard
 T_0 = 0.5; % T<1 seems to work
 beta = 1e-7; % Check hand calculation of this 100
 a = 404; % Centre of curve at fingertip
 % A = 1e-2;
 % Delta_E = 4;
-% R = 6;
 L_finger = round(1e-3/(1.78e-2/ny));
 
 % Boundary condition parameters
 T_c = 0.486; 
 T_h = 0.598;
+T_end = T_h;
 u_finger = 0;
-ux_blood = 0;
-uy_blood = 0.01;
+% ux_blood = 0;
+% uy_blood = 0;
 
 % Vectors
 x = 1:nx;
@@ -29,22 +29,23 @@ xs = zeros(ny,nx);
 for i = 1:nx
     xs(:,i) = x(i);
 end
+T_blood = zeros(a) + T_h;
+T_fing = zeros(a) + T_h;
 
 % Matrices
 rho = zeros(ny,nx) + rho_0; % Density
 
 % D2Q9 velocity set parameters
 ndir = 9;
-c_s = sqrt(1/3);
-c = sqrt(3*T_0); % Assuming T is constant throughout (it isn't), include T_0?
-zeta_x = c*[0, 1, -1, 0, 0, 1, -1, -1, 1];
-zeta_y = c*[0, 0, 0, 1, -1, 1, 1, -1, -1];
+c_0 = sqrt(3*T_0);
+zeta_x = c_0*[0, 1, -1, 0, 0, 1, -1, -1, 1];
+zeta_y = c_0*[0, 0, 0, 1, -1, 1, 1, -1, -1];
 w = [4/9, 1/9, 1/9, 1/9, 1/9, 1/36, 1/36, 1/36, 1/36];
 
 % Simulation parameters - built
 tau_v = 1; % I don't know this, this is a guess, doesn't seem to make difference
-tau_c_bone = 1;
-tau_c_tissue = 0.8;
+tau_c_bone = 1.75;
+tau_c_tissue = 0.641;
 % v = c^2 * (tau_v - 0.5);
 % chi = (2/3) * c^2 * (tau_c - 0.5);
 
@@ -53,6 +54,7 @@ T = zeros(ny, nx) + T_h; % Temperature
 ux = zeros(ny, nx); % Velocity in x direction
 uy = zeros(ny, nx); % Velocity in y direction
 omega = zeros(ny,nx); % Damage function
+c = zeros(ny,nx) + c_0; % Lattice speed
 
 % Force fields
 G = zeros(ny,nx,ndir);
@@ -144,6 +146,11 @@ for i = 1:length(row1)
     end
 end
 
+% Temperature boundary condition
+B = (log(T_h)-log(T_c))/a;
+for i = 1:nx
+    T_fing(i) = exp(log(T_h) - B * i);
+end
 
 
 %% Simulating using LBM
@@ -153,24 +160,27 @@ feq = zeros(ny, nx, ndir);
 udotu = ux.^2 + uy.^2;
 for k = 1:ndir
     zdotu = zeta_x(k)*ux + zeta_y(k)*uy;
-    feq(:, :, k) = w(k)*rho.*(1 + 3*zdotu/(c^2) + 9*zdotu.^2/(c^4) ...
-                              - 1.5*udotu/(c^2));
+    feq(:, :, k) = w(k)*rho.*(1 + 3  .*zdotu   ./(c.^2) ...
+                                + 9  .*zdotu.^2./(c.^4) ...
+                                - 1.5.*udotu   ./(c.^2));
 end
 f = feq;
 fcol = zeros(ny, nx, ndir);
 
 % Fluid temperature g
 geq = zeros(ny, nx, ndir);
-geq(:, :, 1) = 0;
+geq(:, :, 1) = -rho.* T .* udotu ./ (3 .* c.^2);
 for k = 2:5
     zdotu = zeta_x(k)*ux + zeta_y(k)*uy;
-    geq(:, :, k) = rho.* T ./ 9 .* (1.5 + 1.5*zdotu./(c^2) + 2.25*zdotu.^2/(c^4) ...
-                                  - 1.5*udotu./(c^2));
+    geq(:, :, k) = rho.* T ./ 9 .* (1.5 + 1.5 .*zdotu   ./(c.^2) ...
+                                        + 2.25.*zdotu.^2./(c.^4) ...
+                                        - 1.5 .*udotu   ./(c.^2));
 end
 for k = 6:9
     zdotu = zeta_x(k)*ux + zeta_y(k)*uy;
-    geq(:, :, k) = rho.* T ./ 36 .* (3 + 6*zdotu./(c^2) + 4.5*zdotu.^2/(c^4) ...
-                                  - 1.5*udotu./(c^2));
+    geq(:, :, k) = rho.* T ./ 36 .* (3 + 6  .*zdotu   ./(c.^2) ...
+                                       + 4.5.*zdotu.^2./(c.^4) ...
+                                       - 1.5.*udotu   ./(c.^2));
 end
 g = geq;
 gcol = zeros(ny, nx, ndir);
@@ -190,11 +200,11 @@ for t = 1:niter
     for k = 1:ndir
         for i = 1:ny
             for j = 1:nx
-                xstreamed = mod(j + zeta_x(k)/c, nx);
+                xstreamed = mod(j + zeta_x(k)/c_0, nx);
                 if xstreamed == 0
                     xstreamed = nx;
                 end
-                ystreamed = mod(i + zeta_y(k)/c, ny);
+                ystreamed = mod(i + zeta_y(k)/c_0, ny);
                 if ystreamed == 0
                     ystreamed = ny;
                 end
@@ -252,21 +262,21 @@ for t = 1:niter
     
     % Boundary conditions of blood for f
     % LHS Boundary of blood is u = 0.1 using Zou & He
-    for i = [(round(3*ny/4) + 1):(round(3*ny/4) + L_finger - 1) ...
-             (round(ny/4) - L_finger + 1):(round(ny/4) - 1)]
-        rho_w = 1/(1-ux_blood) * (f(i,1,1) + f(i,1,4) + f(i,1,5) + ...
-                             2*(f(i,1,3) + f(i,1,7) + f(i,1,8)));
-        f(i,1,2) = f(i,1,3) + 2/3 * rho_w * ux_blood;
-        f(i,1,6) = f(i,1,8) - 0.5 * (f(i,1,4) - f(i,1,5)) ...
-                   + 1/6 * rho_w * ux_blood + 1/2 * rho_w * uy_blood;
-        f(i,1,9) = f(i,1,7) + 0.5 * (f(i,1,4) - f(i,1,5)) ...
-                   + 1/6 * rho_w * ux_blood - 1/2 * rho_w * uy_blood;
-    end
+    % for i = [(round(3*ny/4) + 1):(round(3*ny/4) + L_finger - 1) ...
+    %          (round(ny/4) - L_finger + 1):(round(ny/4) - 1)]
+    %     rho_w = 1/(1-ux_blood) * (f(i,1,1) + f(i,1,4) + f(i,1,5) + ...
+    %                          2*(f(i,1,3) + f(i,1,7) + f(i,1,8)));
+    %     f(i,1,2) = f(i,1,3) + 2/3 * rho_w * ux_blood;
+    %     f(i,1,6) = f(i,1,8) - 0.5 * (f(i,1,4) - f(i,1,5)) ...
+    %                + 1/6 * rho_w * ux_blood + 1/2 * rho_w * uy_blood;
+    %     f(i,1,9) = f(i,1,7) + 0.5 * (f(i,1,4) - f(i,1,5)) ...
+    %                + 1/6 * rho_w * ux_blood - 1/2 * rho_w * uy_blood;
+    % end
 
     % Top blood vessel walls are u = 0 using bounceback
     opp = [0 2 1 4 3 7 8 5 6];
     for i = [3*ny_s/4 3*ny_s/4 + L_finger]
-        for j = 1:a
+        for j = 2:a
             for k = 1:ndir
                 f(i,j,opp(k)+1) = fcol(i,j,k);
             end
@@ -275,7 +285,7 @@ for t = 1:niter
 
     % Bottom blood vessel walls are u = 0 using bounceback
     for i = [ny_s/4 ny_s/4 + L_finger]
-        for j = 1:a
+        for j = 2:a
             for k = 1:ndir
                 f(i,j,opp(k)+1) = fcol(i,j,k);
             end
@@ -298,8 +308,9 @@ for t = 1:niter
     udotu = ux.^2 + uy.^2;
     for k = 1:ndir
         zdotu = zeta_x(k)*ux + zeta_y(k)*uy;
-        feq(:, :, k) = w(k)*rho.*(1 + 3*zdotu/(c^2) + 9*zdotu.^2/(c^4) ...
-                                  - 1.5*udotu/(c^2));
+        feq(:, :, k) = w(k)*rho.*(1 + 3  .*zdotu   ./(c.^2) ...
+                                    + 9  .*zdotu.^2./(c.^4) ...
+                                    - 1.5.*udotu   ./(c.^2));
     end
 
     
@@ -315,11 +326,11 @@ for t = 1:niter
     for k = 1:ndir
         for i = 1:ny
             for j = 1:nx
-                xstreamed = mod(j + zeta_x(k)/c, nx);
+                xstreamed = mod(j + zeta_x(k)/c_0, nx);
                 if xstreamed == 0
                     xstreamed = nx;
                 end
-                ystreamed = mod(i + zeta_y(k)/c, ny);
+                ystreamed = mod(i + zeta_y(k)/c_0, ny);
                 if ystreamed == 0
                     ystreamed = ny;
                 end
@@ -330,7 +341,7 @@ for t = 1:niter
 
 
     % Boundary conditions for g
-    % LHS Boundary T = T_h using Inamuro
+    % LHS domain Boundary T = T_h using Inamuro
     for i = 1:ny
         for j = 1
             for k = [2 6 9]
@@ -351,6 +362,7 @@ for t = 1:niter
             end
         end
     end
+
     % RHS finger curved Boundary T = T_c using Inamuro
     for i = 1:length(col1)
         T_in = 0;
@@ -370,47 +382,167 @@ for t = 1:niter
         end
     end
 
-    % Top Boundary T = T_c using Inamuro. Note zero velocity
+    % Top domain Boundary T = T_c (varying) using Inamuro. Note zero velocity
     for i = 2
         for j = 2:nx
             for k = [5 8 9]
-                Tdash = 6 * (T_c - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
+                Tdash = 6 * (T_fing(j) - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
                                  - g(i,j,4) - g(i,j,6) - g(i,j,7));
                 g(i,j,k) = w(k) * Tdash;
             end
         end
     end
 
-    % Bottom Boundary T = T_c using Inamuro. Note zero velocity
+    % Bottom domain Boundary T = T_c (varying) using Inamuro. Note zero velocity
     for i = ny-1
         for j = 2:nx
             for k = [4 6 7]
-                Tdash = 6 * (T_c - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
+                Tdash = 6 * (T_fing(j) - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
                                  - g(i,j,5) - g(i,j,8) - g(i,j,9));
                 g(i,j,k) = w(k) * Tdash;
             end
         end
     end
 
+    % Blood vessel boundary temperature
+    lambda = (T_h - T_end)/a;
+    for i = 1:a
+        T_blood(i) = T_h - i * lambda;
+    end
+
+    % Upper blood vessel top wall (enforcing T upwards)
+    for i = 3*ny_s/4 + L_finger
+        for j = 2:(a)
+            for k = [4 6 7]
+                Tdash = 6 * (T_blood(j) - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
+                                        - g(i,j,5) - g(i,j,8) - g(i,j,9));
+                g(i,j,k) = w(k) * Tdash;
+            end
+        end
+    end
+
+    % Upper blood vessel bottom wall (enforcing T downwards)
+    for i = 3*ny_s/4
+        for j = 2:(a)
+            for k = [5 8 9]
+                Tdash = 6 * (T_blood(j) - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
+                                        - g(i,j,4) - g(i,j,6) - g(i,j,7));
+                g(i,j,k) = w(k) * Tdash;
+            end
+        end
+    end
+
+    % Upper blood vessel right wall (enforcing T rightwards)
+    % for i = (3*ny_s/4 + 1):(3*ny_s/4 + L_finger - 1)
+    %     for j = a
+    %         for k = [2 6 9]
+    %             Tdash = 6 * (T_blood(j) - g(i,j,1) - g(i,j,3) - g(i,j,4) ...
+    %                                     - g(i,j,5) - g(i,j,7) - g(i,j,8));
+    %             g(i,j,k) = w(k) * Tdash;
+    %         end
+    %     end
+    % end
+
+    % Upper blood vessel right corners (enforcing T up/down and right)
+    % for i = 3*ny_s/4
+    %     for j = a
+    %         for k = [2 4 6 7 9]
+    %             Tdash = (36/11) * (T_blood(j) - g(i,j,1) - g(i,j,3) ...
+    %                                           - g(i,j,5) - g(i,j,8));
+    %             g(i,j,k) = w(k) * Tdash;
+    %         end
+    %     end
+    % end
+    % for i = 3*ny_s/4 + L_finger
+    %     for j = a
+    %         for k = [2 5 6 8 9]
+    %             Tdash = (36/11) * (T_blood(j) - g(i,j,1) - g(i,j,3) ...
+    %                                           - g(i,j,4) - g(i,j,7));
+    %             g(i,j,k) = w(k) * Tdash;
+    %         end
+    %     end
+    % end
+
+    % Lower blood vessel top wall (enforcing T upwards)
+    for i = ny_s/4
+        for j = 2:(a)
+            for k = [4 6 7]
+                Tdash = 6 * (T_blood(j) - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
+                                        - g(i,j,5) - g(i,j,8) - g(i,j,9));
+                g(i,j,k) = w(k) * Tdash;
+            end
+        end
+    end
+
+    % Upper blood vessel bottom wall (enforcing T downwards)
+    for i = ny_s/4 - L_finger
+        for j = 2:(a)
+            for k = [5 8 9]
+                Tdash = 6 * (T_blood(j) - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
+                                        - g(i,j,4) - g(i,j,6) - g(i,j,7));
+                g(i,j,k) = w(k) * Tdash;
+            end
+        end
+    end
+
+    % Upper blood vessel right wall (enforcing T rightwards)
+    % for i = (ny_s/4 - L_finger + 1):(ny_s/4 - 1)
+    %     for j = a
+    %         for k = [2 6 9]
+    %             Tdash = 6 * (T_blood(j) - g(i,j,1) - g(i,j,3) - g(i,j,4) ...
+    %                                     - g(i,j,5) - g(i,j,7) - g(i,j,8));
+    %             g(i,j,k) = w(k) * Tdash;
+    %         end
+    %     end
+    % end
+
+    % Upper blood vessel right corners (enforcing T up/down and right)
+    % for i = ny_s/4
+    %     for j = a
+    %         for k = [2 4 6 7 9]
+    %             Tdash = (36/11) * (T_blood(j) - g(i,j,1) - g(i,j,3) ...
+    %                                           - g(i,j,5) - g(i,j,8));
+    %             g(i,j,k) = w(k) * Tdash;
+    %         end
+    %     end
+    % end
+    % for i = ny_s/4 - L_finger
+    %     for j = a
+    %         for k = [2 5 6 8 9]
+    %             Tdash = (36/11) * (T_blood(j) - g(i,j,1) - g(i,j,3) ...
+    %                                           - g(i,j,4) - g(i,j,7));
+    %             g(i,j,k) = w(k) * Tdash;
+    %         end
+    %     end
+    % end
+
 
     % Macroscopic variables from g
     rho_x_T = g(:, :, 1) + g(:, :, 2) + g(:, :, 3) + g(:, :, 4) + g(:, :, 5)...
             + g(:, :, 6) + g(:, :, 7) + g(:, :, 8) + g(:, :, 9);
     T = rho_x_T./rho;
+
+    % Updating lattice speed c
+    c = sqrt(3*T);
+
+    % Update sample temperature at boundary of bone to soft tissue
+    T_end = T(ny_s/2,(a + 17*ny_s/64));
     
 
     % Equilibrium distribution function for g
     udotu = ux.^2 + uy.^2;
-    geq(:, :, 1) = -rho.* T .* udotu / (3 * c^2);
+    geq(:, :, 1) = -rho.* T .* udotu ./ (3 .* c.^2);
     for k = 2:5
         zdotu = zeta_x(k)*ux + zeta_y(k)*uy;
-        geq(:, :, k) = rho.* T / 9 .* (1.5 + 1.5*zdotu/(c^2) + 2.25*zdotu.^2/(c^4) ...
-                                      - 1.5*udotu/(c^2));
+        geq(:, :, k) = rho.* T ./ 9 .* (1.5 + 1.5 .*zdotu   ./(c.^2) ...
+                                            + 2.25.*zdotu.^2./(c.^4) ...
+                                            - 1.5 .*udotu   ./(c.^2));
     end
     for k = 6:9
         zdotu = zeta_x(k)*ux + zeta_y(k)*uy;
-        geq(:, :, k) = rho.* T / 36 .* (3 + 6*zdotu/(c^2) + 4.5*zdotu.^2/(c^4) ...
-                                      - 1.5*udotu/(c^2));
+        geq(:, :, k) = rho.* T ./ 36 .* (3 + 6  .*zdotu   ./(c.^2) ...
+                                           + 4.5.*zdotu.^2./(c.^4) ...
+                                           - 1.5.*udotu   ./(c.^2));
     end
 
 
@@ -421,7 +553,7 @@ for t = 1:niter
 
 
     % Tissue damage function update
-    % omega = omega + A * exp( - Delta_E ./ (R * T));
+    % omega = omega + A * exp( - Delta_E ./ T);
 
 
     % Print progress
@@ -433,7 +565,7 @@ for t = 1:niter
     % Save variables to file
     % Necrotic tissue
     % theta = 1 - exp( - omega);
-    if mod(t, 100) == 0
+    if mod(t, 1000) == 0
         T_name = sprintf('/Users/jpritch/Documents/MATLAB/model/130x500/saved/T%04d', t);
         save(T_name, 'T');
         % theta_name = sprintf('/Users/jpritch/Documents/MATLAB/model/130x500/saved/theta%04d', t);
