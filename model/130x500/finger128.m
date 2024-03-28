@@ -42,12 +42,14 @@ w = [4/9, 1/9, 1/9, 1/9, 1/9, 1/36, 1/36, 1/36, 1/36];
 tau_v = 1; % I don't know this, this is a guess, doesn't seem to make difference
 tau_c_bone = 1.75;
 tau_c_tissue = 0.641;
+tau_c_blood = 0.725;
 
 % Initialisation of fields at time t = 0
 T = zeros(ny, nx) + T_h; % Temperature
 ux = zeros(ny, nx); % Velocity in x direction
 uy = zeros(ny, nx); % Velocity in y direction
 omega = zeros(ny,nx); % Damage function
+tau_c = zeros(ny,nx) + tau_c_tissue;
 
 % Force fields
 G = zeros(ny,nx,ndir);
@@ -76,17 +78,22 @@ for j = a+25*ny_s/64:a+31*ny_s/64
     end
 end
 % Bone outline
-tau_c = zeros(ny,nx) + tau_c_tissue;
 [row2,col2] = find(xs >= a & abs(r)<17*ny_s/64);
 for i = 1:length(row2)
     tau_c(row2(i), col2(i)) = tau_c_bone;
 end
-tau_c(ny_s/4 + 1:3*ny_s/4 + 1,1:a) = tau_c_bone;
 % Initialising Temperature field outside finger
 [row3,col3] = find(abs(r)>31*ny_s/64 & xs >= a);
 for i = 1:length(row3)
     T(row3(i), col3(i)) = T_c;
 end
+
+% Tau_c parameters
+% Bone
+tau_c(ny_s/4 + 1 : 3*ny_s/4 + 1, 1:a) = tau_c_bone;
+% Arteries
+tau_c(ny_s/4 - L_artery + 1 : ny_s/4, 1:a) = tau_c_blood;
+tau_c(3*ny_s/4 + 2: 3*ny_s/4 + L_artery + 1, 1:a) = tau_c_blood;
 
 % Directions for Inamuro on a curved b.c.
 dir = cell(length(row1));
