@@ -1,6 +1,6 @@
 %% Plotting of Model Finger with grid size 128
 %% Read variables from file
-load /Users/jpritch/Documents/MATLAB/model/130x500/saved/T3000
+load /Users/jpritch/Documents/MATLAB/model/130x500/saved/T10000.mat
 T = T(2:129,1:468); % This removes the upper and lower rows which weren't
                     % part of the actual model
 
@@ -9,7 +9,7 @@ T = T(2:129,1:468); % This removes the upper and lower rows which weren't
 % Scalars
 nx = 468;
 ny = 128;
-scale = 1.39e-1; % 18 is closest to mm in paper
+scale = ny * 1.39e-4 * 1e3; % ny * C_l * conversion to mm not m
 a = 404; % Centre of curve at fingertip
 T_c = -30; 
 T_h = 26;
@@ -85,7 +85,7 @@ T = 75 * T + 230 - 273;
 
 % Temperature heatmap
 figure;
-axes('FontSize',18, 'NextPlot', 'add');
+axes('FontSize',25, 'NextPlot', 'add');
 % Plotting temperature of finger
 s = pcolor(scale*x/(ny-1),scale*y/(ny-1),T);
 set(s, 'EdgeColor', 'none');
@@ -115,8 +115,8 @@ plot(scale*(zeros(L_artery+1)+a/(ny-1)),scale*((ny/4-L_artery:ny/4)...
 plot(scale*(zeros(L_artery+1)+a/(ny-1)),scale*((3*ny/4-1:3*ny/4+L_artery-1)...
     - (ny-1)/2)/(ny-1), 'k', LineWidth=0.7);
 % Making plot look nice
-xlabel('${x/N_y}$','interpreter','latex', fontsize=25)
-ylabel('${y/N_y}$','interpreter','latex', fontsize=25)
+xlabel('$x$ (mm)','interpreter','latex', fontsize=30)
+ylabel('$y$ (mm)','interpreter','latex', fontsize=30)
 axis equal
 xlim([-0.2*scale 3.85*scale])
 ylim([-0.7*scale 0.7*scale])
@@ -126,9 +126,9 @@ box on
 
 % Temperature contour
 figure;
-axes('FontSize',18, 'NextPlot', 'add');
+axes('FontSize',25, 'NextPlot', 'add');
 % Plotting temperature of finger
-contour(scale*x/(ny-1),scale*y/(ny-1),T, T_c:1:T_h, ...
+contour(scale*x/(ny-1),scale*y/(ny-1),T, T_c:2:T_h, ...
                 LineWidth=0.9);
 % Plotting finger outline
 plot(zeros(ny),scale*((0:ny-1) - (ny-1)/2)/(ny-1), 'k', LineWidth=1);
@@ -156,8 +156,8 @@ plot(scale*(zeros(L_artery+1)+a/(ny-1)),scale*((ny/4-L_artery:ny/4)...
 plot(scale*(zeros(L_artery+1)+a/(ny-1)),scale*((3*ny/4-1:3*ny/4+L_artery-1)...
     - (ny-1)/2)/(ny-1), 'k', LineWidth=0.7);
 % Making plot look nice
-xlabel('${x/N_y}$','interpreter','latex', fontsize=25)
-ylabel('${y/N_y}$','interpreter','latex', fontsize=25)
+xlabel('$x$ (mm)','interpreter','latex', fontsize=30)
+ylabel('$y$ (mm)','interpreter','latex', fontsize=30)
 axis equal
 xlim([-0.2*scale 3.85*scale])
 ylim([-0.7*scale 0.7*scale])

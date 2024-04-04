@@ -5,12 +5,12 @@
 nx = 500;
 ny = 130;
 ny_s = 128; % Simulation ny
-niter = 3000;
+niter = 1000;
 rho_0 = 1; % This is standard
 T_0 = 0.5; % T<1 seems to work
-beta = 0.000016; % Check hand calculation of this 100
 a = 404; % Centre of curve at fingertip
 L_artery = round(1e-3/(1.78e-2/ny));
+heat_const = 9.38e-17;
 
 % Boundary condition parameters
 T_c = 0.175; 
@@ -33,9 +33,9 @@ rho = zeros(ny,nx) + rho_0; % Density
 
 % D2Q9 velocity set parameters
 ndir = 9;
-c_s = sqrt(3);
-zeta_x = [0, 1, -1, 0, 0, 1, -1, -1, 1];
-zeta_y = [0, 0, 0, 1, -1, 1, 1, -1, -1];
+c_s = 1;
+zeta_x = c_s*[0, 1, -1, 0, 0, 1, -1, -1, 1];
+zeta_y = c_s*[0, 0, 0, 1, -1, 1, 1, -1, -1];
 w = [4/9, 1/9, 1/9, 1/9, 1/9, 1/36, 1/36, 1/36, 1/36];
 
 % Simulation parameters - built
@@ -48,7 +48,6 @@ tau_c_blood = 0.725;
 T = zeros(ny, nx) + T_h; % Temperature
 ux = zeros(ny, nx); % Velocity in x direction
 uy = zeros(ny, nx); % Velocity in y direction
-omega = zeros(ny,nx); % Damage function
 tau_c = zeros(ny,nx) + tau_c_tissue;
 
 % Force fields
@@ -462,8 +461,8 @@ for t = 1:niter
 
 
     % Force computation
-    G(:,:,3) = rho(:,:) * beta .* (T(:,:) - T_0);
-    F(:,:,3) = (G(:,:,3).*(zeta_x(3) - ux - uy)./T) .* feq(:, :, 3);
+    G(:,:,3) = rho(:,:) * heat_const .* (T(:,:) - T_0);
+    F(:,:,3) = (G(:,:,3).*(zeta_x(3)+zeta_y(3) - ux - uy)./T) .* feq(:, :, 3);
 
 
     % Print progress
