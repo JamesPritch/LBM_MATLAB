@@ -6,7 +6,7 @@ nx = 64;
 ny = 64;
 niter = 10000;
 rho_0 = 1.0000005;
-beta = 1e-7; % Check hand calculation of this 100
+heat_const = 1e-7; % Check hand calculation of this 100
 T_0 = 0.5;
 T_c = 0.45; % T<1 seems to work
 T_h = 0.55;
@@ -211,7 +211,7 @@ for t = 1:niter
         for j = nx
             for k = [4 7 8]
                 % Tdash = (12/(2+3*uy(i))) .* (T_c - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
-                Tdash = (12/(2+3*uy(i))) .* (T_c - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
+                Tdash = (12/(2+3*uy(i))) .* (T_c*1.014 - g(i,j,1) - g(i,j,2) - g(i,j,3) ...
                                             - g(i,j,5) - g(i,j,6) - g(i,j,9));
                 g(i,j,k) = w(k) * Tdash .* (1 + 3*uy(i));
             end
@@ -249,7 +249,7 @@ for t = 1:niter
 
 
     % Force computation
-    G(:,:,3) = rho(:,:) * beta * (T(:,:) - T_0);
+    G(:,:,3) = rho(:,:) * heat_const * (T(:,:) - T_0);
     F(:,:,3) = (G(:,:,3).*(zeta_x(3) - ux - uy)./T) .* feq(:, :, 3);
 
 

@@ -57,7 +57,7 @@ lg(1).LineWidth = 1;
 lg(2).LineWidth = 1;
 lg(3).LineWidth = 1;
 xlabel('Side Length of Square Domain (l.u.)','interpreter','latex', fontsize=23) 
-ylabel('Error in ${C}$ (${l^2}$-norm)','interpreter','latex', fontsize=23)
+ylabel('Error in ${C}$ (${\ell^2}$-norm)','interpreter','latex', fontsize=23)
 xlim([10 2000])
 ylim([10e-5 10e-0])
 leg = legend('Simulations', 'First order convergence', 'Second order convergence', ...

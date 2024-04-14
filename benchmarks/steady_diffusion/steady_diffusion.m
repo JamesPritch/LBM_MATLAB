@@ -5,10 +5,10 @@
 nx = 60;
 ny = 70;
 gap = 5; % must have nx + 2*gap = ny
-niter = 875;
-rho_0 = 1; % Think this is standard
+niter = 100;
+rho_0 = 1; % This is standard
 T_0 = 0.5; % T<1 seems to work
-beta = 1e-7; % Check hand calculation of this 100
+beta = 1e-7; % Check hand calculation of this
 R = 1; % Stability to ± 1e-3
 
 % Boundary condition parameters

@@ -33,7 +33,7 @@ rho = zeros(ny,nx) + rho_0; % Density
 
 % D2Q9 velocity set parameters
 ndir = 9;
-c_s = 1;
+c_s = 1; % Denoted as c in my dissertation
 zeta_x = c_s*[0, 1, -1, 0, 0, 1, -1, -1, 1];
 zeta_y = c_s*[0, 0, 0, 1, -1, 1, 1, -1, -1];
 w = [4/9, 1/9, 1/9, 1/9, 1/9, 1/36, 1/36, 1/36, 1/36];
