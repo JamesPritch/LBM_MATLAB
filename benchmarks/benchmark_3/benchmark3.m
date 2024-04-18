@@ -1,4 +1,4 @@
-%% Lattice Boltzmann method code: advection-diffusion of Cylinder without flow
+%% Lattice Boltzmann method code: diffusion into steady flow
 %% Setting Grid Independant Variables
 % Simulation parameters - input
 % Scalars
@@ -7,6 +7,8 @@ u_0 = 0.05;
 nx = 1600;
 ny = 160;
 niter = 50000; % This took my computer about 90 minutes
+epsilon = 1e-7;
+stop = false;
 
 % Vectors
 x = 1:nx;
@@ -47,7 +49,7 @@ gcol = zeros(ny, nx, ndir);
 % Simulation loop
 fprintf('Starting simulation \n');
 tic
-for t = 1:niter
+while stop == false
     % Collision
     gcol = omomega*g + omega*geq;
 
@@ -94,18 +96,22 @@ for t = 1:niter
     end
 
     % Macroscopic variables
-    C = g(:, :, 1) + g(:, :, 2) + g(:, :, 3) + g(:, :, 4) + g(:, :, 5)...
+    C1 = g(:, :, 1) + g(:, :, 2) + g(:, :, 3) + g(:, :, 4) + g(:, :, 5)...
         + g(:, :, 6) + g(:, :, 7) + g(:, :, 8) + g(:, :, 9);
+
+    % Difference from past iteration
+    diff = norm(C1-C)/norm(C);
+    fprintf('Difference: %d, Time: %f \n', diff, toc);
+    if diff < epsilon
+        stop = true;
+    end
+    C = C1;
 
     % Equilibrium distribution function
     for k = 1:ndir
         cdotu = cx(k)*ux + cy(k)*uy;
         udotu = ux.^2 + uy.^2;
         geq(:, :, k) = w(k)*C.*(1 + cssqinv*cdotu + 0.5*cssqinv^2*cdotu.^2 - 0.5*cssqinv*udotu);
-    end
-
-    if mod(t, 10) == 0
-        fprintf('Iteration: %d, Time: %f \n', t, toc);
     end
 
 end
