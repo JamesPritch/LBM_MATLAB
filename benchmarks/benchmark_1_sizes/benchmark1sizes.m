@@ -1,4 +1,4 @@
-%% Lattice Boltzmann method code: advection-diffusion of a Gaussian hill
+%% Lattice Boltzmann method code: sizes of a Gaussian hill
 %% Setting Grid Independant Variables
 % Simulation parameters - input
 grids = 5;
@@ -28,9 +28,11 @@ ux_all = [0.2 0.1 0.05 0.025 0.0125];
 uy_all = [0.2 0.1 0.05 0.025 0.0125];
 C = cell(grids, 1);
 
-
+tic
 %% Repeating LBM algorithm over grid sizes
 for l=1:grids
+    toc
+    tic
     % Simulation parameters - input
     niter = niter_all(l);                                                               
     nx = nx_all(l);
@@ -107,7 +109,7 @@ for l=1:grids
     end
 
 end
-
+toc
 
 %% Saving C to file
 save /Users/jpritch/Documents/MATLAB/benchmarks/benchmark_1_sizes/C C

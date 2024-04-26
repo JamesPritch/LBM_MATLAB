@@ -1,4 +1,4 @@
-%% Lattice Boltzmann method code: convection in square cavity
+%% Lattice Boltzmann method code: thermal benchmark with flow
 %% Setting Grid Independant Variables
 % Simulation parameters - input
 % Scalars

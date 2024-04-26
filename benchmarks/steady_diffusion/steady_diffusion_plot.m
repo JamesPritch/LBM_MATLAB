@@ -1,4 +1,4 @@
-%% Plotting of Benchamrk 1 with different grid sizes
+%% Plotting of thermal benchmark with flow
 %% Read variables from file
 load /Users/jpritch/Documents/MATLAB/benchmarks/steady_diffusion
 T_numerical = T;

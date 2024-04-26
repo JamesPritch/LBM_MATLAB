@@ -1,4 +1,4 @@
-%% Lattice Boltzmann method code: convection in square cavity
+%% Lattice Boltzmann method code: Model Finger with grid size 128
 %% Setting Grid Independant Variables
 % Simulation parameters - input
 % Scalars

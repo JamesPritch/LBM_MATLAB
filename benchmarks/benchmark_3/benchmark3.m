@@ -6,7 +6,6 @@ C_p = 1;
 u_0 = 0.05;
 nx = 1600;
 ny = 160;
-niter = 50000; % This took my computer about 90 minutes
 epsilon = 1e-7;
 stop = false;
 

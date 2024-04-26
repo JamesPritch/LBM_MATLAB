@@ -1,4 +1,4 @@
-%% Plotting of Benchamrk 1 with different grid sizes
+%% Plotting of a cylinder without flow
 %% Read C_BGK from file
 load /Users/jpritch/Documents/MATLAB/benchmarks/benchmark_2/C_antiBB
 C_BGK_antiBB = C;

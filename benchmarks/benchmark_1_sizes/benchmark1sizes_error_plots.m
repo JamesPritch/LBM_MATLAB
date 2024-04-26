@@ -1,4 +1,4 @@
-%% Plotting of Benchamrk 1 with different grid sizes
+%% Plotting of Benchmark 1 with different grid sizes
 %% Read C_BGK from file
 load /Users/jpritch/Documents/MATLAB/benchmarks/benchmark_1_sizes/C C
 C_BGK = C;
